@@ -113,9 +113,60 @@
         #login-screen { position: fixed; inset: 0; background: var(--dark); z-index: 2500; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(3px); padding: 20px; }
         .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .dropdown-menu { position: absolute; right: 40px; margin-top: -10px; background: white; border:1px solid #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; z-index: 9999; border-radius: 8px; min-width: 160px; overflow: hidden; }
-        .dropdown-menu.show { display: block; animation: fadeIn 0.2s; }
+        
+        /* --- ESTILOS DO MENU DROPDOWN (Novo Visual) --- */
+        .dropdown-menu { 
+            position: absolute; /* Vai ser sobrescrito pelo JS para fixed */
+            background: white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra estilo Card */
+            display: none; 
+            z-index: 99999; 
+            border-radius: 8px; 
+            min-width: 180px; 
+            overflow: hidden;
+            flex-direction: column;
+            padding: 8px 0; /* Espaçamento vertical interno */
+            animation: fadeIn 0.2s;
+        }
+        
+        .dropdown-menu.show { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilo dos itens dentro do menu para parecer uma lista vertical */
+        .dropdown-menu button {
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 10px 20px; /* Mais espaçamento */
+            font-size: 0.9rem;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Espaço entre ícone e texto */
+            transition: background 0.1s;
+            border-radius: 0; /* Remove bordas arredondadas dos botões internos */
+        }
+        
+        .dropdown-menu button:hover {
+            background-color: #f1f5f9; /* Cinza claro ao passar o mouse */
+        }
+        
+        .dropdown-menu button i {
+            width: 20px; /* Largura fixa pro ícone alinhar o texto */
+            text-align: center;
+            color: #64748b;
+        }
+
+        /* Ajuste específico para o botão de excluir manter a cor vermelha no texto */
+        .dropdown-menu button[style*="color:var(--danger)"] {
+            color: var(--danger) !important;
+        }
+        .dropdown-menu button[style*="color:var(--danger)"] i {
+            color: var(--danger) !important;
+        }
+
         .search-container { position: relative; width: 300px; }
         .search-container i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .search-container input { padding-left: 40px; margin: 0; }
@@ -518,7 +569,39 @@
         function changePage(delta) { state.currentPage += delta; filterTable(); }
         function drillDown(id, name) { if(state.level === 'projects') { state.level = 'plans'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = name; } else if(state.level === 'plans') { state.level = 'scenarios'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = state.parentName + " / " + name; } state.currentPage = 1; loadList(); }
         function filterTable() { const term = document.getElementById('table-search').value.toLowerCase(); renderTable(state.data.filter(i => i.nome.toLowerCase().includes(term))); }
-        function toggleMenu(e, id) { e.stopPropagation(); document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); const m = document.getElementById('menu-'+id); if(m) m.classList.toggle('show'); }
+        
+        // --- FUNÇÃO CORRIGIDA E AJUSTADA ---
+        function toggleMenu(e, id) {
+            e.stopPropagation();
+            const menu = document.getElementById('menu-' + id);
+            const isVisible = menu && menu.classList.contains('show');
+
+            document.querySelectorAll('.dropdown-menu').forEach(d => {
+                d.classList.remove('show');
+                d.style.cssText = ''; 
+            });
+
+            if (!isVisible && menu) {
+                const rect = e.target.getBoundingClientRect();
+                
+                menu.style.position = 'fixed';
+                menu.style.top = (rect.bottom + 5) + 'px';
+                
+                // Ajuste para alinhar a direita do menu com o ícone, evitando que vaze da tela
+                // Largura min-width é 180px, então jogamos 160px para a esquerda
+                menu.style.left = (rect.left - 160) + 'px';
+                
+                menu.style.right = 'auto'; 
+                menu.style.zIndex = '99999';
+
+                menu.classList.add('show');
+            }
+        }
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+        }, true);
+        // ------------------------
+
         window.onclick = function(e) { if(!e.target.matches('.fa-ellipsis-v')) document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); }
         
         async function openMove(id) { state.movingId = id; document.getElementById('modal-move').classList.remove('hidden'); const res = await api({ acao: 'listarProjetos' }); const sel = document.getElementById('move-project'); sel.innerHTML = '<option value="">Selecione o Projeto</option>'; res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`); }
