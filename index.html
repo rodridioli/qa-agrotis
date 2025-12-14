@@ -25,7 +25,9 @@
         #mobile-header { display: none; }
         #sidebar { width: var(--sidebar-width); background: var(--dark); color: white; display: flex; flex-direction: column; transition: 0.3s; white-space: nowrap; z-index: 1000; height: 100vh; flex-shrink: 0; }
         #sidebar.collapsed { width: var(--sidebar-collapsed); }
-        #sidebar.collapsed .brand span, #sidebar.collapsed .menu li span, #sidebar.collapsed .user-info { display: none; }
+        /* Ajuste para que o logo SVG não desapareça, mas apenas o texto */
+        #sidebar.collapsed .brand span { display: none; }
+        #sidebar.collapsed .menu li span, #sidebar.collapsed .user-info { display: none; }
         
         .brand { padding: 0 20px; height: 70px; font-size: 1.3rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; color: #6ee7b7; }
         .toggle-btn { cursor: pointer; padding: 10px; } 
@@ -34,6 +36,10 @@
         .menu li { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.2s; color: #a7f3d0; border-left: 4px solid transparent; }
         .menu li:hover, .menu li.active { background: rgba(255,255,255,0.1); color: white; border-left-color: var(--success); }
         
+        /* Estilização para o item Sair */
+        #menu-logout { color: #fecaca; } /* Cor Vermelha Clara */
+        #menu-logout:hover { background: rgba(239, 68, 68, 0.2); color: #fee2e2; border-left-color: var(--danger); }
+
         .user-panel { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; cursor: pointer; background: rgba(0,0,0,0.2); }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); object-fit: cover; border: 2px solid var(--primary-light); }
         
@@ -316,18 +322,44 @@
 
     <div id="login-screen">
         <div class="card" style="width: 100%; max-width: 400px; text-align: center; padding: 40px 30px;">
-            <div style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"><i class="fas fa-bug"></i></div>
-            <h2 style="margin: 0; color: #1e293b; font-size: 1.5rem;">QA Agrotis</h2>
+            
+            <div style="margin-bottom: 10px;">
+                <svg fill="currentColor" width="70%" version="1.1" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200.7 37" style="enable-background:new 0 0 200.7 37; color: var(--primary);" xml:space="preserve">
+                    <path id="Caminho_7003" d="M106,17.1h-9v2.4c0,0.8,0.6,1.4,1.4,1.4h5v1.2c-1.4,2.4-4,3.9-6.8,3.7c-4,0.2-7.3-2.9-7.5-6.9 c0-0.2,0-0.4,0-0.7c0-4.4,3-7.5,7.3-7.5c2.4,0,4.7,1.1,6,3.1l0.2,0.3l4.5-1.2l-0.3-0.5c-2.1-3.8-6.1-6.1-10.4-6 c-3.1,0-6.2,1.2-8.4,3.4c-2.3,2.3-3.5,5.3-3.5,8.5c0,3.2,1.2,6.3,3.5,8.5c2.2,2.2,5.3,3.4,8.4,3.4c0.1,0,0.2,0,0.3,0h0.1l0.1,0 c2.6-0.1,5.1-1,7.1-2.7c1.3-1.1,2.4-2.5,3.1-4.1l0-0.1v-4.8C107.3,17.8,106.7,17.1,106,17.1"></path>
+                    <path id="Caminho_7004" d="M141.6,26.2c-4.3,0-7.3-3.1-7.3-7.5s3-7.5,7.3-7.5c4.3,0,7.4,3.1,7.4,7.5S145.9,26.2,141.6,26.2 M141.6,6.8c-3.1,0-6.2,1.2-8.4,3.4c-2.3,2.3-3.5,5.3-3.5,8.5c0,3.2,1.2,6.3,3.5,8.5c2.2,2.2,5.3,3.4,8.4,3.4c3.1,0,6.2-1.2,8.4-3.4 c2.3-2.3,3.5-5.3,3.5-8.5c0-3.2-1.2-6.3-3.5-8.5C147.8,8,144.7,6.8,141.6,6.8"></path>
+                    <path id="Caminho_7005" d="M153.6,8.6v2.8h7.1v18.7h4.4V11.4h5.7c0.8,0,1.4-0.6,1.4-1.4V7.2h-17.2C154.2,7.2,153.6,7.9,153.6,8.6"></path>
+                    <path id="Caminho_7006" d="M175.8,8.6v21.5h3c0.8,0,1.4-0.6,1.4-1.4V7.2h-3C176.4,7.2,175.8,7.9,175.8,8.6"></path>
+                    <path id="Caminho_7007" d="M193.3,16.5c-0.3-0.1-0.5-0.2-0.8-0.3c-2.4-0.8-4.5-1.4-4.5-2.9c0-1.9,1.9-2.5,3.7-2.5 c2.1-0.1,4,1.4,4.4,3.5l0.1,0.5l3-0.8c0.6-0.2,0.9-0.7,0.9-1.3c0-0.2,0-0.3-0.1-0.4c0,0,0,0,0-0.1c0,0,0,0,0-0.1 c-1.4-3.3-4.6-5.3-8.2-5.2c-4.7,0-8.3,2.8-8.3,6.6c0,4.2,3.9,5.6,6.3,6.4c0.4,0.1,0.7,0.2,1.1,0.3c2.7,0.8,5.3,1.6,5.3,3.6 c0,1.6-1.6,2.8-4,2.8c-2.4,0.2-4.6-1.5-5-3.9l-0.1-0.5l-3.2,0.9c-0.5,0.2-0.8,0.7-0.8,1.3c0,0.2,0,0.4,0.1,0.5 c1.4,3.7,4.9,6,8.8,5.8c5.1,0,8.7-2.9,8.7-7C200.7,18.8,196.4,17.5,193.3,16.5"></path>
+                    <path id="Caminho_7008" d="M72.3,14.1l3.5,7.3h-7L72.3,14.1z M73.7,7.2h-2.9L59.5,30.2h4c0.5,0,1-0.3,1.2-0.8l1.7-3.6 c0.1-0.1,0.2-0.2,0.4-0.2h10.6c0.1,0,0.3,0.1,0.3,0.2l1.8,3.7c0.2,0.4,0.7,0.7,1.2,0.7h4L73.8,7.5L73.7,7.2z"></path>
+                    <path id="Caminho_7009" d="M127.5,14.8c0-4.6-3.4-7.5-8.9-7.5h-6.3c-0.8,0-1.4,0.6-1.4,1.4v20.1c0,0.8,0.6,1.4,1.4,1.4h3V11.4h3.6 c2.5,0,4,1.2,4,3.3s-1.4,3.3-4,3.3h-2.7l7.1,11.4c0,0,0,0,0,0c0.3,0.4,0.7,0.6,1.2,0.6h4.2l-5.5-8.8 C125.9,20.3,127.6,17.6,127.5,14.8"></path>
+                    <path id="Caminho_7010" d="M30.9,26.1l0.6-1c0.4-0.7,1.1-1.1,1.9-1.1h12.2l0,0c-1.2-2.2-2.4-4.3-3.6-6.5H30.2 c-0.8,0-1.5,0.4-1.9,1.1l-0.6,1.1l-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1H6.9l-3.6,6.5l0,0h25.1c0.8,0,1.5-0.4,1.9-1.1 C30.5,26.8,30.7,26.4,30.9,26.1"></path>
+                    <path id="Caminho_7011" d="M26.1,17.4l0.6-1.1c0.4-0.7,1.1-1.1,1.9-1.1h12.2l0,0c-1.2-2.2-2.4-4.4-3.6-6.5H25.4 c-0.8,0-1.5,0.4-1.9,1.1c-0.2,0.4-0.4,0.7-0.6,1.1l-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1h-8.7c-1.2,2.2-2.4,4.4-3.6,6.5 c-1.8,3.3,0,0,0,0h15.5c0.8,0,1.5-0.4,1.9-1.1L26.1,17.4"></path>
+                    <path id="Caminho_7012" d="M21.3,8.7l0.6-1.1c0.4-0.7,1.1-1.1,1.9-1.1h12.1c0,0,0,0,0,0c0,0,0,0,0,0L33,1.1C32.6,0.4,31.8,0,31,0 H20.2c-0.8,0-1.5,0.4-1.9,1.1c-1.8,3.2-3.6,6.5-5.4,9.7c0,0,0,0,0,0c0,0,0,0,0,0h5.8c0.8,0,1.5-0.4,1.9-1.1L21.3,8.7"></path>
+                    <path id="Caminho_7013" d="M51,33.8l-4.2-7.7H35c-0.8,0-1.6,0.4-2,1.2l-0.6,1c-0.2,0.4-0.4,0.7-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1 H2.1l0,0l-1.8,3.3c-0.6,1.1-0.2,2.4,0.9,3C1.5,36.9,1.8,37,2.2,37H49c1.2,0,2.2-1,2.2-2.2C51.2,34.4,51.1,34.1,51,33.8"></path>
+                </svg>
+            </div>
             <p style="color: #64748b; margin-bottom: 25px;">Sistema de Gestão de Qualidade</p>
-            <input type="text" id="log-email" placeholder="Email" style="margin-bottom: 10px;">
-            <input type="password" id="log-pass" placeholder="Senha" onkeydown="handleLoginKey(event)" style="margin-bottom: 20px;">
+            <input type="email" id="log-email" placeholder="Email *" required style="margin-bottom: 10px;">
+            <input type="password" id="log-pass" placeholder="Senha *" required onkeydown="handleLoginKey(event)" style="margin-bottom: 20px;">
             <button class="btn btn-primary" style="width:100%; padding: 12px;" onclick="doLogin()">Entrar</button>
         </div>
     </div>
 
     <div id="mobile-header">
-        <div style="font-weight:bold; font-size:1.2rem; color:#6ee7b7; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-bug"></i> QA Agrotis
+        <div style="font-weight:bold; font-size:1.2rem; color:white; display: flex; align-items: center; gap: 10px; width: 170px;">
+            <svg fill="currentColor" width="70%" version="1.1" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200.7 37" style="enable-background:new 0 0 200.7 37;" xml:space="preserve">
+                <path id="Caminho_7003" d="M106,17.1h-9v2.4c0,0.8,0.6,1.4,1.4,1.4h5v1.2c-1.4,2.4-4,3.9-6.8,3.7c-4,0.2-7.3-2.9-7.5-6.9 c0-0.2,0-0.4,0-0.7c0-4.4,3-7.5,7.3-7.5c2.4,0,4.7,1.1,6,3.1l0.2,0.3l4.5-1.2l-0.3-0.5c-2.1-3.8-6.1-6.1-10.4-6 c-3.1,0-6.2,1.2-8.4,3.4c-2.3,2.3-3.5,5.3-3.5,8.5c0,3.2,1.2,6.3,3.5,8.5c2.2,2.2,5.3,3.4,8.4,3.4c0.1,0,0.2,0,0.3,0h0.1l0.1,0 c2.6-0.1,5.1-1,7.1-2.7c1.3-1.1,2.4-2.5,3.1-4.1l0-0.1v-4.8C107.3,17.8,106.7,17.1,106,17.1"></path>
+                <path id="Caminho_7004" d="M141.6,26.2c-4.3,0-7.3-3.1-7.3-7.5s3-7.5,7.3-7.5c4.3,0,7.4,3.1,7.4,7.5S145.9,26.2,141.6,26.2 M141.6,6.8c-3.1,0-6.2,1.2-8.4,3.4c-2.3,2.3-3.5,5.3-3.5,8.5c0,3.2,1.2,6.3,3.5,8.5c2.2,2.2,5.3,3.4,8.4,3.4c3.1,0,6.2-1.2,8.4-3.4 c2.3-2.3,3.5-5.3,3.5-8.5c0-3.2-1.2-6.3-3.5-8.5C147.8,8,144.7,6.8,141.6,6.8"></path>
+                <path id="Caminho_7005" d="M153.6,8.6v2.8h7.1v18.7h4.4V11.4h5.7c0.8,0,1.4-0.6,1.4-1.4V7.2h-17.2C154.2,7.2,153.6,7.9,153.6,8.6"></path>
+                <path id="Caminho_7006" d="M175.8,8.6v21.5h3c0.8,0,1.4-0.6,1.4-1.4V7.2h-3C176.4,7.2,175.8,7.9,175.8,8.6"></path>
+                <path id="Caminho_7007" d="M193.3,16.5c-0.3-0.1-0.5-0.2-0.8-0.3c-2.4-0.8-4.5-1.4-4.5-2.9c0-1.9,1.9-2.5,3.7-2.5 c2.1-0.1,4,1.4,4.4,3.5l0.1,0.5l3-0.8c0.6-0.2,0.9-0.7,0.9-1.3c0-0.2,0-0.3-0.1-0.4c0,0,0,0,0-0.1c0,0,0,0,0-0.1 c-1.4-3.3-4.6-5.3-8.2-5.2c-4.7,0-8.3,2.8-8.3,6.6c0,4.2,3.9,5.6,6.3,6.4c0.4,0.1,0.7,0.2,1.1,0.3c2.7,0.8,5.3,1.6,5.3,3.6 c0,1.6-1.6,2.8-4,2.8c-2.4,0.2-4.6-1.5-5-3.9l-0.1-0.5l-3.2,0.9c-0.5,0.2-0.8,0.7-0.8,1.3c0,0.2,0,0.4,0.1,0.5 c1.4,3.7,4.9,6,8.8,5.8c5.1,0,8.7-2.9,8.7-7C200.7,18.8,196.4,17.5,193.3,16.5"></path>
+                <path id="Caminho_7008" d="M72.3,14.1l3.5,7.3h-7L72.3,14.1z M73.7,7.2h-2.9L59.5,30.2h4c0.5,0,1-0.3,1.2-0.8l1.7-3.6 c0.1-0.1,0.2-0.2,0.4-0.2h10.6c0.1,0,0.3,0.1,0.3,0.2l1.8,3.7c0.2,0.4,0.7,0.7,1.2,0.7h4L73.8,7.5L73.7,7.2z"></path>
+                <path id="Caminho_7009" d="M127.5,14.8c0-4.6-3.4-7.5-8.9-7.5h-6.3c-0.8,0-1.4,0.6-1.4,1.4v20.1c0,0.8,0.6,1.4,1.4,1.4h3V11.4h3.6 c2.5,0,4,1.2,4,3.3s-1.4,3.3-4,3.3h-2.7l7.1,11.4c0,0,0,0,0,0c0.3,0.4,0.7,0.6,1.2,0.6h4.2l-5.5-8.8 C125.9,20.3,127.6,17.6,127.5,14.8"></path>
+                <path id="Caminho_7010" d="M30.9,26.1l0.6-1c0.4-0.7,1.1-1.1,1.9-1.1h12.2l0,0c-1.2-2.2-2.4-4.3-3.6-6.5H30.2 c-0.8,0-1.5,0.4-1.9,1.1l-0.6,1.1l-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1H6.9l-3.6,6.5l0,0h25.1c0.8,0,1.5-0.4,1.9-1.1 C30.5,26.8,30.7,26.4,30.9,26.1"></path>
+                <path id="Caminho_7011" d="M26.1,17.4l0.6-1.1c0.4-0.7,1.1-1.1,1.9-1.1h12.2l0,0c-1.2-2.2-2.4-4.4-3.6-6.5H25.4 c-0.8,0-1.5,0.4-1.9,1.1c-0.2,0.4-0.4,0.7-0.6,1.1l-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1h-8.7c-1.2,2.2-2.4,4.4-3.6,6.5 c-1.8,3.3,0,0,0,0h15.5c0.8,0,1.5-0.4,1.9-1.1L26.1,17.4"></path>
+                <path id="Caminho_7012" d="M21.3,8.7l0.6-1.1c0.4-0.7,1.1-1.1,1.9-1.1h12.1c0,0,0,0,0,0c0,0,0,0,0,0L33,1.1C32.6,0.4,31.8,0,31,0 H20.2c-0.8,0-1.5,0.4-1.9,1.1c-1.8,3.2-3.6,6.5-5.4,9.7c0,0,0,0,0,0c0,0,0,0,0,0h5.8c0.8,0,1.5-0.4,1.9-1.1L21.3,8.7"></path>
+                <path id="Caminho_7013" d="M51,33.8l-4.2-7.7H35c-0.8,0-1.6,0.4-2,1.2l-0.6,1c-0.2,0.4-0.4,0.7-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1 H2.1l0,0l-1.8,3.3c-0.6,1.1-0.2,2.4,0.9,3C1.5,36.9,1.8,37,2.2,37H49c1.2,0,2.2-1,2.2-2.2C51.2,34.4,51.1,34.1,51,33.8"></path>
+            </svg>
         </div>
         <i class="fas fa-bars" style="font-size:1.5rem; cursor:pointer;" onclick="toggleMobileSidebar()"></i>
     </div>
@@ -335,13 +367,31 @@
 
     <nav id="sidebar" class="hidden">
         <div class="brand">
-            <span><i class="fas fa-bug"></i> QA Agrotis</span>
+            <span style="color: white; width: 170px;">
+                <svg fill="currentColor" width="70%" version="1.1" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200.7 37" style="enable-background:new 0 0 200.7 37;" xml:space="preserve">
+                    <path id="Caminho_7003" d="M106,17.1h-9v2.4c0,0.8,0.6,1.4,1.4,1.4h5v1.2c-1.4,2.4-4,3.9-6.8,3.7c-4,0.2-7.3-2.9-7.5-6.9 c0-0.2,0-0.4,0-0.7c0-4.4,3-7.5,7.3-7.5c2.4,0,4.7,1.1,6,3.1l0.2,0.3l4.5-1.2l-0.3-0.5c-2.1-3.8-6.1-6.1-10.4-6 c-3.1,0-6.2,1.2-8.4,3.4c-2.3,2.3-3.5,5.3-3.5,8.5c0,3.2,1.2,6.3,3.5,8.5c2.2,2.2,5.3,3.4,8.4,3.4c0.1,0,0.2,0,0.3,0h0.1l0.1,0 c2.6-0.1,5.1-1,7.1-2.7c1.3-1.1,2.4-2.5,3.1-4.1l0-0.1v-4.8C107.3,17.8,106.7,17.1,106,17.1"></path>
+                    <path id="Caminho_7004" d="M141.6,26.2c-4.3,0-7.3-3.1-7.3-7.5s3-7.5,7.3-7.5c4.3,0,7.4,3.1,7.4,7.5S145.9,26.2,141.6,26.2 M141.6,6.8c-3.1,0-6.2,1.2-8.4,3.4c-2.3,2.3-3.5,5.3-3.5,8.5c0,3.2,1.2,6.3,3.5,8.5c2.2,2.2,5.3,3.4,8.4,3.4c3.1,0,6.2-1.2,8.4-3.4 c2.3-2.3,3.5-5.3,3.5-8.5c0-3.2-1.2-6.3-3.5-8.5C147.8,8,144.7,6.8,141.6,6.8"></path>
+                    <path id="Caminho_7005" d="M153.6,8.6v2.8h7.1v18.7h4.4V11.4h5.7c0.8,0,1.4-0.6,1.4-1.4V7.2h-17.2C154.2,7.2,153.6,7.9,153.6,8.6"></path>
+                    <path id="Caminho_7006" d="M175.8,8.6v21.5h3c0.8,0,1.4-0.6,1.4-1.4V7.2h-3C176.4,7.2,175.8,7.9,175.8,8.6"></path>
+                    <path id="Caminho_7007" d="M193.3,16.5c-0.3-0.1-0.5-0.2-0.8-0.3c-2.4-0.8-4.5-1.4-4.5-2.9c0-1.9,1.9-2.5,3.7-2.5 c2.1-0.1,4,1.4,4.4,3.5l0.1,0.5l3-0.8c0.6-0.2,0.9-0.7,0.9-1.3c0-0.2,0-0.3-0.1-0.4c0,0,0,0,0-0.1c0,0,0,0,0-0.1 c-1.4-3.3-4.6-5.3-8.2-5.2c-4.7,0-8.3,2.8-8.3,6.6c0,4.2,3.9,5.6,6.3,6.4c0.4,0.1,0.7,0.2,1.1,0.3c2.7,0.8,5.3,1.6,5.3,3.6 c0,1.6-1.6,2.8-4,2.8c-2.4,0.2-4.6-1.5-5-3.9l-0.1-0.5l-3.2,0.9c-0.5,0.2-0.8,0.7-0.8,1.3c0,0.2,0,0.4,0.1,0.5 c1.4,3.7,4.9,6,8.8,5.8c5.1,0,8.7-2.9,8.7-7C200.7,18.8,196.4,17.5,193.3,16.5"></path>
+                    <path id="Caminho_7008" d="M72.3,14.1l3.5,7.3h-7L72.3,14.1z M73.7,7.2h-2.9L59.5,30.2h4c0.5,0,1-0.3,1.2-0.8l1.7-3.6 c0.1-0.1,0.2-0.2,0.4-0.2h10.6c0.1,0,0.3,0.1,0.3,0.2l1.8,3.7c0.2,0.4,0.7,0.7,1.2,0.7h4L73.8,7.5L73.7,7.2z"></path>
+                    <path id="Caminho_7009" d="M127.5,14.8c0-4.6-3.4-7.5-8.9-7.5h-6.3c-0.8,0-1.4,0.6-1.4,1.4v20.1c0,0.8,0.6,1.4,1.4,1.4h3V11.4h3.6 c2.5,0,4,1.2,4,3.3s-1.4,3.3-4,3.3h-2.7l7.1,11.4c0,0,0,0,0,0c0.3,0.4,0.7,0.6,1.2,0.6h4.2l-5.5-8.8 C125.9,20.3,127.6,17.6,127.5,14.8"></path>
+                    <path id="Caminho_7010" d="M30.9,26.1l0.6-1c0.4-0.7,1.1-1.1,1.9-1.1h12.2l0,0c-1.2-2.2-2.4-4.3-3.6-6.5H30.2 c-0.8,0-1.5,0.4-1.9,1.1l-0.6,1.1l-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1H6.9l-3.6,6.5l0,0h25.1c0.8,0,1.5-0.4,1.9-1.1 C30.5,26.8,30.7,26.4,30.9,26.1"></path>
+                    <path id="Caminho_7011" d="M26.1,17.4l0.6-1.1c0.4-0.7,1.1-1.1,1.9-1.1h12.2l0,0c-1.2-2.2-2.4-4.4-3.6-6.5H25.4 c-0.8,0-1.5,0.4-1.9,1.1c-0.2,0.4-0.4,0.7-0.6,1.1l-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1h-8.7c-1.2,2.2-2.4,4.4-3.6,6.5 c-1.8,3.3,0,0,0,0h15.5c0.8,0,1.5-0.4,1.9-1.1L26.1,17.4"></path>
+                    <path id="Caminho_7012" d="M21.3,8.7l0.6-1.1c0.4-0.7,1.1-1.1,1.9-1.1h12.1c0,0,0,0,0,0c0,0,0,0,0,0L33,1.1C32.6,0.4,31.8,0,31,0 H20.2c-0.8,0-1.5,0.4-1.9,1.1c-1.8,3.2-3.6,6.5-5.4,9.7c0,0,0,0,0,0c0,0,0,0,0,0h5.8c0.8,0,1.5-0.4,1.9-1.1L21.3,8.7"></path>
+                    <path id="Caminho_7013" d="M51,33.8l-4.2-7.7H35c-0.8,0-1.6,0.4-2,1.2l-0.6,1c-0.2,0.4-0.4,0.7-0.6,1.1c-0.4,0.7-1.1,1.1-1.9,1.1 H2.1l0,0l-1.8,3.3c-0.6,1.1-0.2,2.4,0.9,3C1.5,36.9,1.8,37,2.2,37H49c1.2,0,2.2-1,2.2-2.2C51.2,34.4,51.1,34.1,51,33.8"></path>
+                </svg>
+            </span>
             <i class="fas fa-bars toggle-btn" onclick="toggleSidebarDesktop()"></i>
         </div>
         <ul class="menu">
             <li onclick="navTo('dashboard')" id="menu-dash"><i class="fas fa-chart-line"></i> <span>Dashboard</span></li>
             <li onclick="navTo('projects')" id="menu-proj"><i class="fas fa-project-diagram"></i> <span>Projetos</span></li>
             <li onclick="navTo('profile')" id="menu-prof"><i class="fas fa-user"></i> <span>Perfil</span></li>
+            
+            <li onclick="doLogout()" id="menu-logout" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding: 15px 20px;">
+                <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
+            </li>
         </ul>
         <div class="user-panel">
             <img src="" id="sidebar-avatar" class="user-avatar">
@@ -487,9 +537,9 @@
         <div id="view-profile" class="view-section hidden">
             <div class="card" style="max-width: 500px; margin: 0 auto;">
                 <h2 style="margin-top:0">Meu Perfil</h2>
-                <div class="form-group"><label>Nome</label><input type="text" id="p-nome"></div>
+                <div class="form-group"><label>Nome *</label><input type="text" id="p-nome" required></div>
                 <div class="form-group"><label>Email</label><input type="text" id="p-email" readonly style="background:#f1f5f9"></div>
-                <div class="form-group"><label>Senha</label><input type="password" id="p-senha"></div>
+                <div class="form-group"><label>Senha *</label><input type="password" id="p-senha" required></div>
                 <div class="form-group"><label>Foto URL</label><input type="text" id="p-foto"></div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="updateProfile()">Atualizar Dados</button>
             </div>
@@ -578,7 +628,7 @@
                 <div id="hist-pagination" class="pagination hidden">
                     <button id="btn-hist-prev" onclick="changeHistoryPage(-1)"><i class="fas fa-chevron-left"></i></button>
                     <span id="page-hist-info">Pg 1</span>
-                    <button id="btn-hist-next" onclick="changeHistoryPage(1)"><i class="fas fa-chevron-right"></i></button>
+                    <button id="btn-hist-next" onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
@@ -587,7 +637,7 @@
 
     <script>
         // Use o seu URL de API aqui
-        const API_URL = "https://script.google.com/macros/s/AKfycbzylXoPy_nAPCMG0nbUP7dnTv0cRNIjrPKw4QEzfqAa7ABvWZZm_NsEAWKmgG2FzqcUcg/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbxaGGsYNt_OWCsQd3HIizuGIwJu9fmsBRT8q7NmFcjFPAoecdnJLCn3sh1XrN8Vb5ovXA/exec"; 
 
         let state = { user: null, view: 'dashboard', level: 'projects', parentId: null, grandParentId: null, parentName: null, grandParentName: null, data: [], currentItem: null, currentPage: 1, itemsPerPage: 30, movingId: null, historyData: [], historyPage: 1 };
 
@@ -601,8 +651,15 @@
 
         function handleLoginKey(e) { if(e.key === 'Enter') doLogin(); }
         async function doLogin() {
-            const email = document.getElementById('log-email').value;
-            const pass = document.getElementById('log-pass').value;
+            const email = document.getElementById('log-email').value.trim();
+            const pass = document.getElementById('log-pass').value.trim();
+            
+            // 1. VALIDAÇÃO DE OBRIGATORIEDADE PARA LOGIN
+            if (!email || !pass) {
+                alert("Email e Senha são obrigatórios para login.");
+                return;
+            }
+            
             toggleLoader(true);
             const res = await api({ acao: 'login', email, senha: pass });
             toggleLoader(false);
@@ -619,6 +676,14 @@
                 navTo('dashboard');
             } else alert(res.mensagem);
         }
+        
+        // NOVA FUNÇÃO DE LOGOUT
+        function doLogout() {
+            // Limpa o estado local (opcional, mas boa prática)
+            state.user = null;
+            // Redireciona para a tela de login (simulado recarregando a página)
+            location.reload(); 
+        }
 
         function toggleSidebarDesktop() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function toggleMobileSidebar() { const sb = document.getElementById('sidebar'); const overlay = document.getElementById('sidebar-overlay'); sb.classList.remove('hidden'); sb.classList.toggle('mobile-open'); overlay.classList.toggle('show'); }
@@ -629,7 +694,17 @@
             if(window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebar-overlay').classList.remove('show'); }
             if(view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); document.getElementById('menu-dash').classList.add('active'); loadDashboard(); } 
             else if(view === 'projects') { document.getElementById('view-list').classList.remove('hidden'); document.getElementById('menu-proj').classList.add('active'); state.level = 'projects'; state.parentId = null; state.currentPage = 1; loadList(); } 
-            else if(view === 'profile') { document.getElementById('view-profile').classList.remove('hidden'); document.getElementById('menu-prof').classList.add('active'); }
+            else if(view === 'profile') { 
+                document.getElementById('view-profile').classList.remove('hidden'); 
+                document.getElementById('menu-prof').classList.add('active'); 
+                // Garante que os campos atuais do usuário logado estão no formulário ao abrir o perfil
+                if(state.user) {
+                    document.getElementById('p-nome').value = state.user.nome;
+                    document.getElementById('p-email').value = state.user.email;
+                    document.getElementById('p-foto').value = state.user.foto || '';
+                    document.getElementById('p-senha').value = ''; // Sempre limpa o campo senha por segurança
+                }
+            }
         }
 
         async function loadDashboard(background = false) {
@@ -1082,7 +1157,7 @@
             // OBSERVAÇÕES
             addSectionTitle("OBSERVAÇÕES");
             renderContent(data.obs); 
-            
+
             // EVIDÊNCIAS ANEXAS
             if((data.evidenciasData && data.evidenciasData.length > 0) || (data.evidenciasUrls && data.evidenciasUrls.length > 0)) {
                 
@@ -1129,7 +1204,46 @@
             doc.save(fileName); 
         }
 
-        async function updateProfile() { const dados = { acao: 'atualizarUsuario', emailOriginal: state.user.email, novoEmail: document.getElementById('p-email').value, novoNome: document.getElementById('p-nome').value, novaSenha: document.getElementById('p-senha').value, novaFoto: document.getElementById('p-foto').value }; if(!dados.novaSenha) return alert("Senha necessária"); toggleLoader(true); await api(dados); toggleLoader(false); alert("Perfil atualizado. Relogue."); location.reload(); }
+        async function updateProfile() { 
+            const nome = document.getElementById('p-nome').value.trim();
+            const senha = document.getElementById('p-senha').value.trim();
+            const foto = document.getElementById('p-foto').value.trim();
+            const emailOriginal = state.user.email; // Email original é usado para identificação
+
+            // 2. VALIDAÇÃO DE OBRIGATORIEDADE PARA PERFIL
+            if (!nome || !senha) {
+                alert("Nome e Senha são campos obrigatórios para atualização do perfil.");
+                return;
+            }
+
+            const dados = { 
+                acao: 'atualizarUsuario', 
+                emailOriginal: emailOriginal, 
+                // O email novo é o mesmo do original, mas enviamos para consistência (e a função do Apps Script espera 'novoEmail')
+                novoEmail: emailOriginal, 
+                novoNome: nome, 
+                novaSenha: senha, 
+                novaFoto: foto
+            }; 
+            
+            toggleLoader(true); 
+            const res = await api(dados); 
+            toggleLoader(false); 
+
+            if(res.status === 'sucesso') {
+                // Atualiza o state.user localmente com o novo nome/foto
+                state.user.nome = nome;
+                state.user.foto = foto;
+                // Atualiza Sidebar
+                document.getElementById('sidebar-name').innerText = state.user.nome;
+                document.getElementById('sidebar-avatar').src = state.user.foto || `https://ui-avatars.com/api/?name=${state.user.nome}&background=059669&color=fff`;
+
+                alert("Perfil atualizado com sucesso!"); 
+                // Não é necessário reload se o email não mudou. 
+            } else {
+                alert("Erro ao atualizar perfil: " + res.mensagem);
+            }
+        }
         function toggleLoader(show) { const l = document.getElementById('loader'); show ? l.classList.remove('hidden') : l.classList.add('hidden'); }
         async function api(data) { try { return await (await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })).json(); } catch(e) { return { status: 'erro', mensagem: e.toString() }; } }
     </script>
