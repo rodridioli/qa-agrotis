@@ -538,7 +538,7 @@
             <div class="card" style="max-width: 500px; margin: 0 auto;">
                 <h2 style="margin-top:0">Meu Perfil</h2>
                 <div class="form-group"><label>Nome *</label><input type="text" id="p-nome" required></div>
-                <div class="form-group"><label>Email</label><input type="text" id="p-email" readonly style="background:#f1f5f9"></div>
+                <div class="form-group"><label>Email</label><input type="text" id="p-email" readonly disabled style="background:#DEDEDE;"></div>
                 <div class="form-group"><label>Senha *</label><input type="password" id="p-senha" required></div>
                 <div class="form-group"><label>Foto URL</label><input type="text" id="p-foto"></div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="updateProfile()">Atualizar Dados</button>
@@ -584,22 +584,22 @@
                     </div>
 
                     <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid #bae6fd;">
-                        <label style="display:block; margin-bottom:5px; color: #0284c7;">Requisitos:</label>
+                        <label style="display:block; margin-bottom:5px; color: #0284c7;">Requisitos</label>
                         <span id="exec-reqs" style="white-space: pre-wrap; color: #0369a1;"></span>
                     </div>
                     
                     <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px;">
-                        <label style="display:block; margin-bottom:5px;">Passos:</label>
+                        <label style="display:block; margin-bottom:5px;">Passos</label>
                         <span id="exec-steps" style="white-space: pre-wrap;"></span>
                     </div>
 
                     <div style="background: #fff7ed; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid #ffedd5;">
-                         <label style="display:block; margin-bottom:5px; color: #9a3412;">Resultado Esperado:</label>
+                         <label style="display:block; margin-bottom:5px; color: #9a3412;">Resultado Esperado</label>
                          <span id="exec-expected" style="white-space: pre-wrap; color: #9a3412;"></span>
                     </div>
 
-                    <div class="form-group"><label>Status</label><select id="exec-status"><option value="Sucesso">✅ Sucesso</option><option value="Bug">❌ Bug / Falha</option></select></div>
-                    <div class="form-group"><label>Resultado Obtido (**bold**, - list)</label><textarea id="exec-actual" rows="3"></textarea></div>
+                    <div class="form-group"><label>Status *</label><select id="exec-status" required><option value="Sucesso">✅ Sucesso</option><option value="Bug">❌ Bug / Falha</option></select></div>
+                    <div class="form-group"><label>Resultado Obtido * (**bold**, - list)</label><textarea id="exec-actual" required rows="3"></textarea></div>
                     
                     <div class="form-group"><label>Jira (Link)</label><input type="url" id="exec-jira" placeholder="https://jira.exemplo.com/browse/QA-123"></div>
                     
@@ -635,7 +635,7 @@
 
     </main>
 
-    <script>
+   <script>
         // Use o seu URL de API aqui
         const API_URL = "https://script.google.com/macros/s/AKfycbxaGGsYNt_OWCsQd3HIizuGIwJu9fmsBRT8q7NmFcjFPAoecdnJLCn3sh1XrN8Vb5ovXA/exec"; 
 
@@ -861,13 +861,18 @@
             let context = state.level === 'projects' ? 'Projeto' : state.level === 'plans' ? 'Plano' : 'Cenário'; 
             document.getElementById('form-title').innerText = `${state.currentItem ? 'Editar' : 'Novo'} ${context}`; 
             const c = document.getElementById('form-fields'); 
-            c.innerHTML = `<div class="form-group"><label>Nome</label><input id="f-nome"></div>`; 
+            c.innerHTML = `<div class="form-group"><label>Nome *</label><input id="f-nome" required></div>`; 
             
             if(state.level !== 'scenarios') { 
-                c.innerHTML += `<div class="form-group"><label>Descrição</label><textarea id="f-desc"></textarea></div>`; 
+                // Projeto ou Plano: Nome* e Descrição*
+                c.innerHTML += `<div class="form-group"><label>Descrição *</label><textarea id="f-desc" required></textarea></div>`; 
             } else { 
-                // ADICIONADO: Campo Requisitos
-                c.innerHTML += `<div class="form-group"><label>Requisitos</label><textarea id="f-reqs" rows="3"></textarea></div><div class="form-group"><label>Tipo de Execução</label><select id="f-tipo"><option value="Manual">Manual</option><option value="Automatizado">Automatizado</option><option value="Manual e Automatizado">Manual e Automatizado</option></select></div><div class="form-group"><label>Passos</label><textarea id="f-passos" rows="4"></textarea></div><div class="form-group"><label>Resultado Esperado</label><textarea id="f-res" rows="2"></textarea></div>`; 
+                // Cenário: Nome*, Requisitos*, Tipo*, Passos*, Resultado Esperado*
+                c.innerHTML += `
+                    <div class="form-group"><label>Requisitos *</label><textarea id="f-reqs" rows="3" required></textarea></div>
+                    <div class="form-group"><label>Tipo de Execução *</label><select id="f-tipo" required><option value="Manual">Manual</option><option value="Automatizado">Automatizado</option><option value="Manual e Automatizado">Manual e Automatizado</option></select></div>
+                    <div class="form-group"><label>Passos *</label><textarea id="f-passos" rows="4" required></textarea></div>
+                    <div class="form-group"><label>Resultado Esperado *</label><textarea id="f-res" rows="2" required></textarea></div>`; 
             } 
             
             if(state.currentItem) { 
@@ -882,21 +887,38 @@
 
         function closeForm() { state.currentItem = null; document.getElementById('view-form').classList.add('hidden'); document.getElementById('view-list').classList.remove('hidden'); }
         async function saveItem() { 
-            let item = { nome: document.getElementById('f-nome').value }; 
+            let item = { nome: document.getElementById('f-nome').value.trim() }; 
             let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; 
-            if(state.level === 'plans') { item.descricao = document.getElementById('f-desc').value; if(!state.currentItem) item.projeto_id = state.parentId; } 
-            if(state.level === 'projects') item.descricao = document.getElementById('f-desc').value; 
+            
+            // Validação de Nome (Obrigatório em todos os níveis)
+            if (!item.nome) { alert("O campo Nome é obrigatório."); return; }
+            
+            if(state.level !== 'scenarios') { 
+                // Projeto ou Plano: Descrição Obrigatória
+                item.descricao = document.getElementById('f-desc').value.trim();
+                if (!item.descricao) { alert("O campo Descrição é obrigatório."); return; }
+                if(!state.currentItem && state.level === 'plans') item.projeto_id = state.parentId; 
+            }
+            
             if(state.level === 'scenarios') { 
-                item.requisitos = document.getElementById('f-reqs').value;
+                // Cenário: Vários campos obrigatórios
+                item.requisitos = document.getElementById('f-reqs').value.trim();
                 item.tipo_execucao = document.getElementById('f-tipo').value; 
-                item.passo_a_passo = document.getElementById('f-passos').value; 
-                item.resultado_esperado = document.getElementById('f-res').value; 
+                item.passo_a_passo = document.getElementById('f-passos').value.trim(); 
+                item.resultado_esperado = document.getElementById('f-res').value.trim(); 
+                
+                if (!item.requisitos) { alert("O campo Requisitos é obrigatório."); return; }
+                if (!item.passo_a_passo) { alert("O campo Passos é obrigatório."); return; }
+                if (!item.resultado_esperado) { alert("O campo Resultado Esperado é obrigatório."); return; }
+                
                 if(!state.currentItem) item.plano_id = state.parentId; 
             } 
+            
             toggleLoader(true); 
             const res = await api({ acao: state.currentItem ? 'editar' : 'criar', aba, item, id: state.currentItem?.id }); 
             toggleLoader(false); 
             if(res.status === 'sucesso') { closeForm(); loadList(); loadDashboard(true); } 
+            else alert("Erro ao salvar: " + res.mensagem);
         }
         function editItem(id) { state.currentItem = state.data.find(i => i.id == id); openForm(); }
         async function deleteItem(id) { if(confirm("Excluir item?")) { let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; toggleLoader(true); await api({ acao: 'excluir', aba, id }); toggleLoader(false); loadList(); loadDashboard(true); } }
@@ -915,20 +937,34 @@
             document.getElementById('exec-steps').innerText = state.executingItem.passo_a_passo || 'Sem passos'; 
             document.getElementById('exec-expected').innerText = state.executingItem.resultado_esperado || 'Não especificado'; 
             
+            // Limpa campos para nova execução
+            document.getElementById('exec-status').value = 'Sucesso';
             document.getElementById('exec-actual').value = ''; 
             document.getElementById('exec-obs').value = ''; 
             document.getElementById('exec-jira').value = '';
             document.getElementById('exec-files').value = ''; 
+
+            // ATUALIZA RÓTULOS (HTML) - A obrigatoriedade foi tratada no HTML e validada no JS
+            // <div class="form-group"><label>Status *</label><select id="exec-status" required>...
+            // <div class="form-group"><label>Resultado Obtido * (**bold**, - list)</label><textarea id="exec-actual" required rows="3"></textarea></div>
+            // <div class="form-group"><label>Jira (Link) *</label><input type="url" id="exec-jira" placeholder="https://jira.exemplo.com/browse/QA-123"></div>
+            
             document.getElementById('modal-execute').classList.remove('hidden'); 
         }
         
         function closeModal() { document.getElementById('modal-execute').classList.add('hidden'); }
         async function confirmExecution() { 
-            const status = document.getElementById('exec-status').value; 
-            const actual = document.getElementById('exec-actual').value; 
-            const obs = document.getElementById('exec-obs').value; 
-            const jira = document.getElementById('exec-jira').value; 
+            const status = document.getElementById('exec-status').value.trim(); 
+            const actual = document.getElementById('exec-actual').value.trim(); 
+            const obs = document.getElementById('exec-obs').value.trim(); 
+            const jira = document.getElementById('exec-jira').value.trim(); 
             const files = document.getElementById('exec-files').files; 
+            
+            // 4. VALIDAÇÃO DE OBRIGATORIEDADE PARA EXECUÇÃO
+            if (!status) { alert("O campo Status é obrigatório."); return; }
+            if (!actual) { alert("O campo Resultado Obtido é obrigatório."); return; }
+            if (!jira) { alert("O campo Jira (Link) é obrigatório."); return; }
+            
             toggleLoader(true); 
             let fileData = []; 
             if(files.length > 0) { fileData = await Promise.all(Array.from(files).map(f => new Promise(r => { const reader = new FileReader(); reader.onload = () => r({name: f.name, data: reader.result}); reader.readAsDataURL(f); }))); } 
@@ -972,7 +1008,7 @@
                 }); 
                 loadList(); 
                 loadDashboard(true); 
-            } 
+            } else alert("Erro ao registrar execução: " + res.mensagem);
         }
 
         // --- FUNÇÃO generatePDF CORRIGIDA E ESTILIZADA ---
@@ -1247,5 +1283,19 @@
         function toggleLoader(show) { const l = document.getElementById('loader'); show ? l.classList.remove('hidden') : l.classList.add('hidden'); }
         async function api(data) { try { return await (await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })).json(); } catch(e) { return { status: 'erro', mensagem: e.toString() }; } }
     </script>
+    
+    <div id="modal-execute" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div style="padding: 20px; overflow-y: auto; flex-grow: 1;">
+                <div class="form-group"><label>Status *</label><select id="exec-status" required><option value="Sucesso">✅ Sucesso</option><option value="Bug">❌ Bug / Falha</option></select></div>
+                <div class="form-group"><label>Resultado Obtido * (**bold**, - list)</label><textarea id="exec-actual" required rows="3"></textarea></div>
+                
+                <div class="form-group"><label>Jira (Link) *</label><input type="url" id="exec-jira" placeholder="https://jira.exemplo.com/browse/QA-123" required></div>
+                
+                <div class="form-group"><label>Observações</label><textarea id="exec-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Evidências (Imagens)</label><input type="file" id="exec-files" multiple accept="image/*"></div>
+            </div>
+            </div>
+    </div>
 </body>
 </html>
