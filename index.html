@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Agrotis System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* TEMA VERDE (EMERALD) */
+        :root { 
+            --primary: #059669; --primary-dark: #047857; --primary-light: #d1fae5;
+            --dark: #064e3b; --bg-light: #f0fdf4; --text: #334155; 
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg-light); color: var(--text); overflow: hidden; }
+        
+        #sidebar { width: 260px; background: var(--dark); color: white; display: flex; flex-direction: column; transition: 0.3s; white-space: nowrap; }
+        #sidebar.collapsed { width: 70px; }
+        #sidebar.collapsed .brand span, #sidebar.collapsed .menu li span, #sidebar.collapsed .user-info { display: none; }
+        
+        .brand { padding: 20px; font-size: 1.3rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; color: #6ee7b7; }
+        .toggle-btn { cursor: pointer; padding: 5px; } .toggle-btn:hover { color: white; }
+
+        .menu { list-style: none; padding: 0; margin: 20px 0; flex-grow: 1; }
+        .menu li { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.2s; color: #a7f3d0; border-left: 4px solid transparent; }
+        .menu li:hover, .menu li.active { background: rgba(255,255,255,0.1); color: white; border-left-color: var(--success); }
+        
+        .user-panel { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; cursor: pointer; background: rgba(0,0,0,0.2); }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); object-fit: cover; border: 2px solid var(--primary-light); }
+        
+        #main { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: #94a3b8; color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 5px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { font-weight: 600; font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
+
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
+        .filter-group { display: flex; gap: 10px; align-items: center; background: white; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .filter-group input { margin: 0; padding: 8px; width: 140px; }
+        
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-val { font-size: 2rem; font-weight: bold; color: var(--dark); }
+        .stat-label { color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        
+        .table-container { padding: 0; border-radius: 12px; border: 1px solid #e2e8f0; background: white; overflow: visible !important; }
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .data-table th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; }
+        .data-table td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
+        .data-table tr.clickable:hover td { background: var(--bg-light); cursor: pointer; }
+        
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-top: 1px solid #f1f5f9; background: #f9fafb; border-radius: 0 0 12px 12px; }
+        .pagination button { background: white; border: 1px solid #cbd5e1; padding: 5px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; color: #64748b; }
+        .pagination button:hover { border-color: var(--primary); color: var(--primary); }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #login-screen { position: fixed; inset: 0; background: var(--dark); z-index: 2500; display: flex; justify-content: center; align-items: center; background-image: radial-gradient(#047857 1px, transparent 1px); background-size: 20px 20px; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-box { background: white; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; }
+        .dropdown-menu { position: absolute; right: 20px; top: 40px; background: white; border:1px solid #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; z-index: 9999; border-radius: 6px; min-width: 150px; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu button { width: 100%; text-align: left; padding: 12px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;}
+        .dropdown-menu button:hover { background: #f0fdf4; color: var(--primary); }
+
+        .search-container { position: relative; width: 300px; }
+        .search-container i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-container input { padding-left: 35px; margin: 0; }
+        
+        .breadcrumb-link { cursor: pointer; color: var(--primary); text-decoration: underline; }
+        .breadcrumb-link:hover { color: var(--primary-dark); }
+        .breadcrumb-active { color: #64748b; font-weight: normal; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loader" class="hidden">
+        <div class="spinner"></div>
+        <div style="font-weight: 600; color: var(--primary);">Processando...</div>
+    </div>
+
+    <div id="login-screen">
+        <div class="card" style="width: 100%; max-width: 400px; text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"><i class="fas fa-bug"></i></div>
+            <h2 style="margin: 0; color: #1e293b;">QA Agrotis</h2>
+            <p style="color: #64748b;">Sistema de Gestão de Qualidade</p>
+            <input type="text" id="log-email" placeholder="Email">
+            <input type="password" id="log-pass" placeholder="Senha" onkeydown="handleLoginKey(event)">
+            <button class="btn btn-primary" style="width:100%; margin-top: 15px;" onclick="doLogin()">Entrar</button>
+        </div>
+    </div>
+
+    <nav id="sidebar" class="hidden">
+        <div class="brand">
+            <span><i class="fas fa-bug"></i> QA Agrotis</span>
+            <i class="fas fa-bars toggle-btn" onclick="toggleSidebar()"></i>
+        </div>
+        <ul class="menu">
+            <li onclick="navTo('dashboard')" id="menu-dash"><i class="fas fa-chart-line"></i> <span>Dashboard</span></li>
+            <li onclick="navTo('projects')" id="menu-proj"><i class="fas fa-project-diagram"></i> <span>Projetos</span></li>
+            <li onclick="navTo('profile')" id="menu-prof"><i class="fas fa-user"></i> <span>Perfil</span></li>
+        </ul>
+        <div class="user-panel">
+            <img src="" id="sidebar-avatar" class="user-avatar">
+            <div class="user-info" style="color: white;">
+                <div style="font-weight:bold; font-size: 0.9rem;" id="sidebar-name">User</div>
+                <div style="font-size:0.75rem; opacity: 0.8;">QA Analyst</div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main" class="hidden">
+        
+        <div id="view-dashboard" class="view-section">
+            <div class="dash-header">
+                <h2 style="margin:0; color: var(--dark);">Dashboard Analítico</h2>
+                <div class="filter-group">
+                    <span style="font-size: 0.85rem; font-weight: 600; color:#64748b;">Período:</span>
+                    <input type="date" id="dash-start">
+                    <span style="color:#cbd5e1">até</span>
+                    <input type="date" id="dash-end">
+                    <button class="btn btn-primary" style="padding: 8px 15px;" onclick="loadDashboard()"><i class="fas fa-filter"></i></button>
+                </div>
+            </div>
+            
+            <div class="dash-grid">
+                <div class="stat-card" style="border-color: #059669;">
+                    <div class="stat-val" id="d-projs">0</div>
+                    <div class="stat-label">Projetos</div>
+                </div>
+                <div class="stat-card" style="border-color: #059669;">
+                    <div class="stat-val" id="d-plans">0</div>
+                    <div class="stat-label">Planos de Teste</div>
+                </div>
+                <div class="stat-card" style="border-color: #059669;">
+                    <div class="stat-val" id="d-scenarios">0</div>
+                    <div class="stat-label">Cenários</div>
+                </div>
+                <div class="stat-card" style="border-color: #3b82f6;">
+                    <div class="stat-val" id="d-users">0</div>
+                    <div class="stat-label">Usuários</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-chart-area" style="color: var(--primary)"></i> Evolução Diária (Período Selecionado)</h3>
+                <div style="height: 300px;"><canvas id="chartEvolution"></canvas></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div class="card">
+                    <h3>Projetos (Testes vs Falhas)</h3>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="data-table">
+                            <thead><tr><th>Projeto</th><th style="text-align:center">Execuções</th><th style="text-align:center; color:green">Sucesso</th><th style="text-align:center; color:red">Bugs</th></tr></thead>
+                            <tbody id="dash-projects-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Produtividade da Equipe</h3>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="data-table">
+                            <thead><tr><th>Analista</th><th style="text-align:center">Execuções</th><th style="text-align:center; color:green">Sucesso</th><th style="text-align:center; color:red">Bugs</th></tr></thead>
+                            <tbody id="dash-users-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-list" class="view-section hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <div id="breadcrumb" style="font-size: 0.85rem; font-weight: bold;"></div>
+                    <h2 id="list-title" style="margin:0; color: var(--dark);">Lista</h2>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="table-search" placeholder="Filtrar..." onkeyup="filterTable()">
+                    </div>
+                    <button class="btn btn-secondary hidden" id="btn-back" onclick="goBack()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                    <button class="btn btn-primary" id="btn-new" onclick="openForm()"><i class="fas fa-plus"></i> Novo</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr id="table-head"></tr></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+                <div id="empty-msg" style="padding: 30px; text-align: center; color: #94a3b8;" class="hidden">Nenhum registro encontrado.</div>
+                
+                <div id="pagination" class="pagination hidden">
+                    <button id="btn-prev" onclick="changePage(-1)"><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <span id="page-info" style="font-size: 0.85rem; font-weight: bold; color: #64748b;">Página 1</span>
+                    <button id="btn-next" onclick="changePage(1)">Próximo <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-form" class="view-section hidden">
+            <div class="card" style="max-width: 700px; margin: 0 auto;">
+                <h2 id="form-title">Novo Item</h2>
+                <div id="form-fields"></div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="closeForm()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="saveItem()">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-move" class="modal-overlay hidden">
+            <div class="modal-box" style="max-width: 400px;">
+                <div style="padding: 20px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0">Mover Cenário</h3>
+                    <i class="fas fa-times" style="cursor:pointer" onclick="document.getElementById('modal-move').classList.add('hidden')"></i>
+                </div>
+                <div style="padding: 20px;">
+                    <p style="color:#64748b; font-size:0.9rem; margin-top:0;">Selecione o novo destino para este cenário:</p>
+                    <div class="form-group">
+                        <label>Projeto</label>
+                        <select id="move-project" onchange="loadMovePlans()"><option value="">Carregando...</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Plano de Teste</label>
+                        <select id="move-plan"><option value="">Selecione o Projeto primeiro</option></select>
+                    </div>
+                </div>
+                <div style="padding: 20px; border-top: 1px solid #eee; text-align: right; background: #f9fafb;">
+                    <button class="btn btn-secondary" onclick="document.getElementById('modal-move').classList.add('hidden')">Cancelar</button>
+                    <button class="btn btn-primary" onclick="confirmMove()">Mover</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-execute" class="modal-overlay hidden">
+            <div class="modal-box">
+                <div style="padding: 20px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0">Executar Cenário</h3>
+                    <i class="fas fa-times" style="cursor:pointer" onclick="closeModal()"></i>
+                </div>
+                <div style="padding: 20px; overflow-y: auto;">
+                    <h4 id="exec-name" style="color: var(--primary); margin-top:0;"></h4>
+                    <p style="background: #f0fdf4; padding: 10px; border-radius: 6px; font-size: 0.9rem;" id="exec-steps"></p>
+                    <div class="form-group"><label>Status</label><select id="exec-status"><option value="Sucesso">✅ Sucesso</option><option value="Bug">❌ Bug / Falha</option></select></div>
+                    <div class="form-group"><label>Resultado Obtido (Markdown: **bold**, - lista)</label><textarea id="exec-actual" rows="3"></textarea></div>
+                    <div class="form-group"><label>Observações</label><textarea id="exec-obs" rows="2"></textarea></div>
+                    <div class="form-group"><label>Evidências</label><input type="file" id="exec-files" multiple accept="image/*"></div>
+                </div>
+                <div style="padding: 20px; border-top: 1px solid #eee; text-align: right; background: #f9fafb;">
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button class="btn btn-success" onclick="confirmExecution()">Confirmar e Gerar PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-profile" class="view-section hidden">
+            <div class="card" style="max-width: 500px; margin: 0 auto;">
+                <h2>Meu Perfil</h2>
+                <div class="form-group"><label>Nome</label><input type="text" id="p-nome"></div>
+                <div class="form-group"><label>Email</label><input type="text" id="p-email" readonly></div>
+                <div class="form-group"><label>Senha</label><input type="password" id="p-senha"></div>
+                <div class="form-group"><label>Foto URL</label><input type="text" id="p-foto"></div>
+                <button class="btn btn-primary" style="width: 100%" onclick="updateProfile()">Atualizar</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzNhSBvpWJ2MmsUKbycWRKxfLd4p66t9zgtd5Zi7O56sDVkxkWJeTXAeBvLKoFy4B0saQ/exec"; 
+
+        let state = { 
+            user: null, view: 'dashboard', level: 'projects', 
+            parentId: null, grandParentId: null, data: [], currentItem: null,
+            currentPage: 1, itemsPerPage: 30,
+            movingId: null // ID do cenário sendo movido
+        };
+
+        window.onload = () => {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            document.getElementById('dash-start').valueAsDate = firstDay;
+            document.getElementById('dash-end').valueAsDate = lastDay;
+        };
+
+        function handleLoginKey(e) { if(e.key === 'Enter') doLogin(); }
+        async function doLogin() {
+            const email = document.getElementById('log-email').value;
+            const pass = document.getElementById('log-pass').value;
+            toggleLoader(true);
+            const res = await api({ acao: 'login', email, senha: pass });
+            toggleLoader(false);
+            if(res.status === 'sucesso') {
+                state.user = res.data.user;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('sidebar').classList.remove('hidden');
+                document.getElementById('main').classList.remove('hidden');
+                document.getElementById('sidebar-name').innerText = state.user.nome;
+                document.getElementById('sidebar-avatar').src = state.user.foto || `https://ui-avatars.com/api/?name=${state.user.nome}&background=059669&color=fff`;
+                document.getElementById('p-nome').value = state.user.nome;
+                document.getElementById('p-email').value = state.user.email;
+                document.getElementById('p-foto').value = state.user.foto || '';
+                navTo('dashboard');
+            } else alert(res.mensagem);
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+        function navTo(view) {
+            document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
+            document.querySelectorAll('.menu li').forEach(e => e.classList.remove('active'));
+            if(view === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('menu-dash').classList.add('active');
+                loadDashboard();
+            } else if(view === 'projects') {
+                document.getElementById('view-list').classList.remove('hidden');
+                document.getElementById('menu-proj').classList.add('active');
+                state.level = 'projects'; state.parentId = null;
+                state.currentPage = 1;
+                loadList();
+            } else if(view === 'profile') {
+                document.getElementById('view-profile').classList.remove('hidden');
+                document.getElementById('menu-prof').classList.add('active');
+            }
+        }
+
+        async function loadDashboard(background = false) {
+            const start = document.getElementById('dash-start').value;
+            const end = document.getElementById('dash-end').value;
+            if(!background) toggleLoader(true);
+            const res = await api({ acao: 'dashboard', inicio: start, fim: end });
+            if(!background) toggleLoader(false);
+            if(res.status === 'sucesso') {
+                const k = res.data.kpis;
+                document.getElementById('d-projs').innerText = k.projects; document.getElementById('d-plans').innerText = k.plans;
+                document.getElementById('d-scenarios').innerText = k.scenarios; document.getElementById('d-users').innerText = k.users;
+                
+                const tbProj = document.getElementById('dash-projects-body'); tbProj.innerHTML = '';
+                res.data.projetos.forEach(p => { 
+                    tbProj.innerHTML += `<tr><td><b>${p.nome}</b></td><td style="text-align:center">${p.total}</td><td style="text-align:center; color: var(--success)">${p.sucesso}</td><td style="text-align:center; color: var(--danger); font-weight:bold">${p.falha}</td></tr>`; 
+                });
+                
+                const tbUser = document.getElementById('dash-users-body'); tbUser.innerHTML = '';
+                res.data.usuarios.forEach(u => {
+                    let avatar = u.foto || `https://ui-avatars.com/api/?name=${u.nome}&background=ddd&color=333`;
+                    tbUser.innerHTML += `<tr><td style="display:flex; align-items:center; gap:10px;"><img src="${avatar}" style="width:30px; height:30px; border-radius:50%"><b>${u.nome}</b></td><td style="text-align:center; font-weight:bold">${u.total}</td><td style="text-align:center;"><span class="badge badge-green">${u.sucesso}</span></td><td style="text-align:center;"><span class="badge badge-red">${u.bugs}</span></td></tr>`;
+                });
+                renderEvolutionChart(res.data.timeline);
+            }
+        }
+
+        function renderEvolutionChart(timelineData) {
+            const ctx = document.getElementById('chartEvolution');
+            if (window.chartEvol && typeof window.chartEvol.destroy === 'function') window.chartEvol.destroy();
+            window.chartEvol = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timelineData.labels,
+                    datasets: [
+                        { label: 'Sucessos', data: timelineData.sucesso, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.3 },
+                        { label: 'Bugs / Falhas', data: timelineData.bug, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.3 }
+                    ]
+                },
+                options: { maintainAspectRatio: false, responsive: true, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { position: 'top' } } }
+            });
+        }
+
+        function updateBreadcrumb() {
+            const bc = document.getElementById('breadcrumb');
+            if(state.level === 'projects') bc.innerHTML = `<span class="breadcrumb-active">Projetos</span>`;
+            else if(state.level === 'plans') bc.innerHTML = `<span class="breadcrumb-link" onclick="state.level='projects'; loadList()">Projetos</span> > <span class="breadcrumb-active">Planos</span>`;
+            else if(state.level === 'scenarios') bc.innerHTML = `<span class="breadcrumb-link" onclick="state.level='projects'; loadList()">Projetos</span> > <span class="breadcrumb-link" onclick="state.level='plans'; state.parentId=state.grandParentId; state.parentName=state.grandParentName; loadList()">Planos</span> > <span class="breadcrumb-active">Cenários</span>`;
+        }
+        function goBack() {
+            if(state.level === 'scenarios') { state.level = 'plans'; state.parentId = state.grandParentId; state.parentName = state.grandParentName; }
+            else if(state.level === 'plans') { state.level = 'projects'; }
+            state.currentPage = 1;
+            loadList();
+        }
+
+        async function loadList() {
+            let payload = {}; let title = '', btnText = '';
+            if(state.level === 'projects') { payload = { acao: 'listarProjetos' }; title = 'Projetos'; btnText = 'Novo Projeto'; document.getElementById('btn-back').classList.add('hidden'); } 
+            else if(state.level === 'plans') { payload = { acao: 'listarPlanos', projetoId: state.parentId }; title = 'Planos de: ' + state.parentName; btnText = 'Novo Plano'; document.getElementById('btn-back').classList.remove('hidden'); } 
+            else { payload = { acao: 'listarCenarios', planoId: state.parentId }; title = state.parentName + ' / Cenários'; btnText = 'Novo Cenário'; document.getElementById('btn-back').classList.remove('hidden'); }
+            document.getElementById('list-title').innerText = title; updateBreadcrumb(); document.getElementById('btn-new').innerHTML = `<i class="fas fa-plus"></i> ${btnText}`; document.getElementById('table-search').value = ''; toggleLoader(true);
+            const res = await api(payload); toggleLoader(false); 
+            state.data = res.data || []; 
+            state.currentPage = 1; 
+            renderTable();
+        }
+
+        function renderTable(filteredData = null) {
+            const dataToRender = filteredData || state.data;
+            const tb = document.getElementById('table-body'); tb.innerHTML = '';
+            const th = document.getElementById('table-head'); th.innerHTML = '';
+            
+            const pagDiv = document.getElementById('pagination');
+            if (dataToRender.length > state.itemsPerPage) {
+                pagDiv.classList.remove('hidden');
+                document.getElementById('page-info').innerText = `Página ${state.currentPage} de ${Math.ceil(dataToRender.length / state.itemsPerPage)}`;
+                document.getElementById('btn-prev').disabled = state.currentPage === 1;
+                document.getElementById('btn-next').disabled = state.currentPage === Math.ceil(dataToRender.length / state.itemsPerPage);
+            } else { pagDiv.classList.add('hidden'); }
+
+            const start = (state.currentPage - 1) * state.itemsPerPage;
+            const end = start + state.itemsPerPage;
+            const pageItems = dataToRender.slice(start, end);
+
+            // Cabeçalhos atualizados
+            if(state.level === 'projects') th.innerHTML = '<th>Nome</th><th>Descrição</th><th>Qtd Planos</th><th>Total Cenários</th><th></th>';
+            else if(state.level === 'plans') th.innerHTML = '<th>Nome</th><th>Descrição</th><th>Qtd Cenários</th><th></th>';
+            else th.innerHTML = '<th>Cenário</th><th>Tipo</th><th>Execuções</th><th>Bugs</th><th>Sucesso</th><th></th>';
+
+            if(pageItems.length === 0) return document.getElementById('empty-msg').classList.remove('hidden');
+            document.getElementById('empty-msg').classList.add('hidden');
+
+            pageItems.forEach(item => {
+                let tr = document.createElement('tr'); tr.classList.add('clickable');
+                tr.onclick = (e) => { 
+                    if(e.target.closest('.dropdown-menu') || e.target.closest('.fa-ellipsis-v')) return; 
+                    if(state.level === 'projects') drillDown(item.id, item.nome); 
+                    else if(state.level === 'plans') drillDown(item.id, item.nome);
+                    else if(state.level === 'scenarios') openExec(item.id); 
+                };
+                let html = '';
+                if(state.level === 'projects') html = `<td><b>${item.nome}</b></td><td>${item.descricao||''}</td><td><span class="badge badge-info">${item.qtd_planos}</span></td><td><span class="badge badge-green">${item.qtd_cenarios}</span></td>`;
+                else if(state.level === 'plans') html = `<td><b>${item.nome}</b></td><td>${item.descricao||''}</td><td><span class="badge badge-info">${item.qtd_cenarios}</span></td>`;
+                else { 
+                    let st = item.stats; 
+                    let tipoBadge = `<span class="badge" style="background:#f1f5f9; color:#64748b">${item.tipo_execucao || 'N/A'}</span>`;
+                    html = `<td><b>${item.nome}</b></td><td>${tipoBadge}</td><td>${st.total}</td><td><span class="badge badge-red">${st.falha}</span></td><td><span class="badge badge-green">${st.sucesso}</span></td>`; 
+                }
+                
+                let btnMain = state.level === 'scenarios' ? `<button onclick="openExec('${item.id}')" style="color:var(--success)"><i class="fas fa-play"></i> Executar</button>` : `<button onclick="drillDown('${item.id}', '${item.nome}')"><i class="fas fa-folder-open"></i> Abrir</button>`;
+                
+                // Botão Mover apenas para cenários
+                let btnMove = state.level === 'scenarios' ? `<button onclick="openMove('${item.id}')"><i class="fas fa-exchange-alt"></i> Mover</button>` : '';
+
+                html += `<td style="text-align:right;position:relative;width:50px;"><i class="fas fa-ellipsis-v" style="cursor:pointer;padding:10px;color:#94a3b8" onclick="toggleMenu(event,'${item.id}')"></i><div id="menu-${item.id}" class="dropdown-menu">${btnMain}${btnMove}<button onclick="editItem('${item.id}')"><i class="fas fa-edit"></i> Editar</button><button onclick="deleteItem('${item.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i> Excluir</button></div></td>`;
+                tr.innerHTML = html; tb.appendChild(tr);
+            });
+        }
+
+        function changePage(delta) { state.currentPage += delta; filterTable(); }
+
+        function drillDown(id, name) { 
+            if(state.level === 'projects') { state.level = 'plans'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = name; } 
+            else if(state.level === 'plans') { state.level = 'scenarios'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = state.parentName + " / " + name; } 
+            state.currentPage = 1; loadList(); 
+        }
+        
+        function filterTable() { const term = document.getElementById('table-search').value.toLowerCase(); renderTable(state.data.filter(i => i.nome.toLowerCase().includes(term))); }
+        function toggleMenu(e, id) { e.stopPropagation(); document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); const m = document.getElementById('menu-'+id); if(m) m.classList.toggle('show'); }
+        window.onclick = function(e) { if(!e.target.matches('.fa-ellipsis-v')) document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); }
+        
+        // --- FUNÇÕES DE MOVER ---
+        async function openMove(id) {
+            state.movingId = id;
+            document.getElementById('modal-move').classList.remove('hidden');
+            // Carrega Projetos
+            const res = await api({ acao: 'listarProjetos' });
+            const sel = document.getElementById('move-project');
+            sel.innerHTML = '<option value="">Selecione o Projeto</option>';
+            res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`);
+        }
+
+        async function loadMovePlans() {
+            const pId = document.getElementById('move-project').value;
+            const sel = document.getElementById('move-plan');
+            sel.innerHTML = '<option value="">Carregando...</option>';
+            if(!pId) return;
+            const res = await api({ acao: 'listarPlanos', projetoId: pId });
+            sel.innerHTML = '<option value="">Selecione o Plano</option>';
+            res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`);
+        }
+
+        async function confirmMove() {
+            const novoPlano = document.getElementById('move-plan').value;
+            if(!novoPlano) return alert("Selecione um plano");
+            toggleLoader(true);
+            const res = await api({ acao: 'moverCenario', cenarioId: state.movingId, novoPlanoId: novoPlano });
+            toggleLoader(false);
+            if(res.status === 'sucesso') {
+                alert("Cenário movido com sucesso!");
+                document.getElementById('modal-move').classList.add('hidden');
+                loadList();
+            } else alert("Erro ao mover");
+        }
+
+        // --- CRUD PADRÃO ---
+        function openForm() { 
+            document.getElementById('view-list').classList.add('hidden'); document.getElementById('view-form').classList.remove('hidden'); 
+            let context = state.level === 'projects' ? 'Projeto' : state.level === 'plans' ? 'Plano' : 'Cenário'; 
+            document.getElementById('form-title').innerText = `${state.currentItem ? 'Editar' : 'Novo'} ${context}`; 
+            const c = document.getElementById('form-fields'); 
+            c.innerHTML = `<div class="form-group"><label>Nome</label><input id="f-nome"></div>`; 
+            
+            if(state.level !== 'scenarios') {
+                c.innerHTML += `<div class="form-group"><label>Descrição</label><textarea id="f-desc"></textarea></div>`; 
+            } else {
+                // Novo Campo: Tipo de Execução
+                c.innerHTML += `
+                    <div class="form-group">
+                        <label>Tipo de Execução</label>
+                        <select id="f-tipo">
+                            <option value="Manual">Manual</option>
+                            <option value="Automatizado">Automatizado</option>
+                            <option value="Manual e Automatizado">Manual e Automatizado</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Passos</label><textarea id="f-passos" rows="4"></textarea></div>
+                    <div class="form-group"><label>Resultado Esperado</label><textarea id="f-res" rows="2"></textarea></div>`; 
+            }
+            
+            if(state.currentItem) { 
+                document.getElementById('f-nome').value = state.currentItem.nome; 
+                if(document.getElementById('f-desc')) document.getElementById('f-desc').value = state.currentItem.descricao || ''; 
+                if(document.getElementById('f-tipo')) document.getElementById('f-tipo').value = state.currentItem.tipo_execucao || 'Manual';
+                if(document.getElementById('f-passos')) document.getElementById('f-passos').value = state.currentItem.passo_a_passo || ''; 
+                if(document.getElementById('f-res')) document.getElementById('f-res').value = state.currentItem.resultado_esperado || ''; 
+            } 
+        }
+
+        function closeForm() { state.currentItem = null; document.getElementById('view-form').classList.add('hidden'); document.getElementById('view-list').classList.remove('hidden'); }
+        
+        async function saveItem() { 
+            let item = { nome: document.getElementById('f-nome').value }; 
+            let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; 
+            
+            if(state.level === 'plans') { item.descricao = document.getElementById('f-desc').value; if(!state.currentItem) item.projeto_id = state.parentId; } 
+            if(state.level === 'projects') item.descricao = document.getElementById('f-desc').value; 
+            
+            if(state.level === 'scenarios') { 
+                item.tipo_execucao = document.getElementById('f-tipo').value; // Salva o novo campo
+                item.passo_a_passo = document.getElementById('f-passos').value; 
+                item.resultado_esperado = document.getElementById('f-res').value; 
+                if(!state.currentItem) item.plano_id = state.parentId; 
+            } 
+            
+            toggleLoader(true); 
+            const res = await api({ acao: state.currentItem ? 'editar' : 'criar', aba, item, id: state.currentItem?.id }); 
+            toggleLoader(false); 
+            if(res.status === 'sucesso') { closeForm(); loadList(); loadDashboard(true); } 
+        }
+
+        function editItem(id) { state.currentItem = state.data.find(i => i.id == id); openForm(); }
+        async function deleteItem(id) { if(confirm("Excluir item?")) { let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; toggleLoader(true); await api({ acao: 'excluir', aba, id }); toggleLoader(false); loadList(); loadDashboard(true); } }
+        
+        function openExec(id) { state.executingItem = state.data.find(i => i.id == id); document.getElementById('exec-name').innerText = state.executingItem.nome; document.getElementById('exec-steps').innerText = state.executingItem.passo_a_passo || 'Sem passos'; document.getElementById('exec-actual').value = ''; document.getElementById('exec-obs').value = ''; document.getElementById('exec-files').value = ''; document.getElementById('modal-execute').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal-execute').classList.add('hidden'); }
+        
+        async function confirmExecution() {
+            const status = document.getElementById('exec-status').value;
+            const actual = document.getElementById('exec-actual').value;
+            const obs = document.getElementById('exec-obs').value;
+            const files = document.getElementById('exec-files').files;
+            
+            toggleLoader(true);
+            let fileData = [];
+            if(files.length > 0) {
+                 fileData = await Promise.all(Array.from(files).map(f => new Promise(r => {
+                    const reader = new FileReader();
+                    reader.onload = () => r({name: f.name, data: reader.result});
+                    reader.readAsDataURL(f);
+                 })));
+            }
+            let urls = [];
+            if (fileData.length > 0) {
+                 const upRes = await api({ acao: 'uploadMultiplo', arquivos: fileData });
+                 if(upRes.status === 'sucesso') urls = upRes.data.urls;
+            }
+
+            const res = await api({
+                acao: 'registrarExecucao',
+                cenarioId: state.executingItem.id,
+                projetoId: state.grandParentId, 
+                planoId: state.parentId,
+                status: status,
+                resultadoObtido: actual,
+                obs: obs,
+                evidencias: urls.join(', '),
+                usuario: state.user.email
+            });
+            
+            toggleLoader(false);
+            if(res.status === 'sucesso') { 
+                closeModal(); 
+                generatePDF({ cenario: state.executingItem.nome, passos: state.executingItem.passo_a_passo, esperado: state.executingItem.resultado_esperado, status: status, obtido: actual, obs: obs, evidenciasUrls: urls, evidenciasData: fileData, usuario: state.user.nome });
+                loadList(); 
+                loadDashboard(true);
+            }
+        }
+
+        function generatePDF(data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const color = data.status === 'Sucesso' ? '#059669' : '#ef4444';
+            doc.setFillColor(color); doc.rect(0, 0, 210, 20, 'F');
+            doc.setTextColor('#ffffff'); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text("Relatório de Execução - QA Agrotis", 105, 13, { align: "center" });
+
+            doc.setTextColor('#333333'); doc.setFontSize(10);
+            let y = 35; const lineH = 6;
+            
+            const renderMarkdown = (label, text) => {
+                doc.setFont('helvetica', 'bold'); doc.text(label, 15, y); y += lineH;
+                doc.setFont('helvetica', 'normal');
+                if(!text) { y += lineH; return; }
+                const lines = text.split('\n');
+                lines.forEach(line => {
+                    let prefix = ""; let cleanLine = line;
+                    if(line.trim().startsWith('-')) { prefix = "• "; cleanLine = line.trim().substring(1).trim(); }
+                    if(cleanLine.includes('**')) { doc.setFont('helvetica', 'bold'); cleanLine = cleanLine.replace(/\*\*/g, ''); } else { doc.setFont('helvetica', 'normal'); }
+                    const splitText = doc.splitTextToSize(prefix + cleanLine, 180);
+                    doc.text(splitText, 15, y);
+                    y += (splitText.length * lineH);
+                });
+                y += 5;
+            };
+
+            doc.setFont('helvetica', 'bold'); doc.text("Cenário:", 15, y); doc.setFont('helvetica', 'normal'); doc.text(data.cenario, 35, y); y+=10;
+            doc.setFont('helvetica', 'bold'); doc.text("Executado por:", 15, y); doc.setFont('helvetica', 'normal'); doc.text(data.usuario + " em " + new Date().toLocaleString(), 45, y); y+=10;
+            doc.setDrawColor(200); doc.line(15, y, 195, y); y += 10;
+            renderMarkdown("Passo a Passo:", data.passos);
+            renderMarkdown("Resultado Esperado:", data.esperado);
+            doc.setFillColor(data.status === 'Sucesso' ? '#d1fae5' : '#fee2e2'); doc.rect(15, y-5, 180, 15, 'F');
+            doc.setFont('helvetica', 'bold'); doc.setTextColor(data.status === 'Sucesso' ? '#065f46' : '#991b1b'); doc.text("STATUS FINAL: " + data.status.toUpperCase(), 105, y+2, {align: 'center'});
+            doc.setTextColor('#333333'); y += 20;
+            renderMarkdown("Resultado Obtido:", data.obtido);
+            renderMarkdown("Observações:", data.obs);
+
+            if(data.evidenciasData && data.evidenciasData.length > 0) {
+                if(y > 200) { doc.addPage(); y = 20; }
+                doc.setFont('helvetica', 'bold'); doc.text("Evidências Visuais:", 15, y); y+=10;
+                data.evidenciasData.forEach(file => {
+                    if(y > 220) { doc.addPage(); y = 20; }
+                    try { doc.addImage(file.data, 'JPEG', 15, y, 80, 60); doc.setFontSize(8); doc.text(file.name, 15, y+65); doc.setFontSize(10); y += 75; } catch(e) { doc.text("[Erro img]", 15, y); y += 10; }
+                });
+            }
+            if(data.evidenciasUrls && data.evidenciasUrls.length > 0) {
+                if(y > 260) { doc.addPage(); y = 20; }
+                doc.setFont('helvetica', 'bold'); doc.text("Links no Drive:", 15, y); y+=7;
+                doc.setFont('helvetica', 'normal'); doc.setTextColor('#0000FF'); 
+                data.evidenciasUrls.forEach(link => { doc.textWithLink("Abrir Arquivo", 15, y, { url: link }); y+=7; });
+            }
+            doc.save(`Execucao_${data.cenario.substring(0,10)}.pdf`);
+        }
+
+        async function updateProfile() { const dados = { acao: 'atualizarUsuario', emailOriginal: state.user.email, novoEmail: document.getElementById('p-email').value, novoNome: document.getElementById('p-nome').value, novaSenha: document.getElementById('p-senha').value, novaFoto: document.getElementById('p-foto').value }; if(!dados.novaSenha) return alert("Senha necessária"); toggleLoader(true); await api(dados); toggleLoader(false); alert("Perfil atualizado. Relogue."); location.reload(); }
+        function toggleLoader(show) { const l = document.getElementById('loader'); show ? l.classList.remove('hidden') : l.classList.add('hidden'); }
+        async function api(data) { try { return await (await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })).json(); } catch(e) { return { status: 'erro', mensagem: e.toString() }; } }
+    </script>
+</body>
+</html>
