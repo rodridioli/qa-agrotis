@@ -48,22 +48,149 @@
             #sidebar .toggle-btn { display: none; }
             #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; backdrop-filter: blur(2px); }
             #sidebar-overlay.show { display: block; }
+            
             #main { padding: 15px; padding-bottom: 80px; }
             .dash-grid, .grid-2-cols { grid-template-columns: 1fr !important; gap: 15px; }
             .dash-header { flex-direction: column; align-items: flex-start; gap: 10px; }
             .filter-group { width: 100%; flex-direction: column; align-items: stretch; }
             .filter-group input { width: 100% !important; margin: 0; }
             .filter-group button { width: 100%; margin-top: 5px; }
-            .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .data-table { min-width: 600px; }
+            
             #view-list > div:first-child { flex-direction: column; align-items: flex-start; gap: 15px; }
-            #view-list .search-container { width: 100%; }
-            #view-list button { width: 100%; justify-content: center; }
+            #view-list .search-container { width: 100%; max-width: 100% !important; }
+            #view-list button { width: 100%; justify-content: center; } 
+
+            /* --- TABELAS RESPONSIVAS (CARD VIEW) --- */
+            .table-container { border: none; background: transparent; overflow: visible; }
+            .data-table { display: block; width: 100%; min-width: 0 !important; }
+            .data-table thead { display: none; } 
+            
+            .data-table tbody { display: block; width: 100%; }
+            .data-table tr { 
+                display: block; 
+                background: white; 
+    
+                border-radius: 12px; 
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+                border: 1px solid #e2e8f0;
+                padding: 15px;
+                position: relative; 
+            }
+            
+            .data-table td { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding: 8px 0; 
+                border-bottom: 1px solid #f1f5f9; 
+                text-align: right;
+                font-size: 0.9rem;
+            }
+            .data-table td:last-child { border-bottom: none; }
+            
+            .data-table td::before { 
+                content: attr(data-label); 
+                font-weight: 700; 
+                color: #64748b; 
+                font-size: 0.8rem; 
+                text-transform: uppercase;
+                margin-right: 15px;
+                text-align: left;
+                flex-shrink: 0;
+            }
+
+            .data-table td:first-child { 
+                display: block; 
+                width: 100%; 
+                text-align: left; 
+                font-size: 1.1rem; 
+                color: var(--dark); 
+                border-bottom: 2px solid #f1f5f9; 
+                margin-bottom: 8px; 
+                padding-bottom: 8px;
+                padding-right: 40px; 
+            }
+            .data-table td:first-child::before { display: none; }
+
+            .data-table td.action-cell { 
+                position: absolute; 
+                top: 10px; 
+                right: 5px; 
+                width: auto; 
+                border: none; 
+                padding: 0;
+                z-index: 2; 
+            }
+            .data-table td.action-cell::before { display: none; }
+            .data-table td.action-cell i { font-size: 1.2rem; padding: 10px; color: #64748b; }
+
+            /* --- CORREÇÃO VISUAL DO HISTÓRICO --- */
+            #modal-history .data-table td {
+                display: block; 
+                text-align: left;
+                padding: 12px 0;
+            }
+            #modal-history .data-table td::before {
+                display: block; 
+                margin-bottom: 5px;
+                color: #94a3b8;
+                font-size: 0.75rem;
+            }
+            
+            #modal-history .data-table td[data-label="Projeto/Plano"] {
+                 display: flex !important; 
+                 flex-direction: column !important; 
+                 align-items: flex-start !important;
+                 gap: 4px; 
+            }
+            #modal-history .data-table td[data-label="Projeto/Plano"] > div {
+                 width: 100%;
+                 word-break: break-word;
+            }
+
+            .data-table td[data-label="Descrição"] { flex-direction: column; align-items: flex-start; text-align: left; gap: 5px; }
+            
+            /* --- MENU BOTTOM SHEET (Mobile) --- */
+            .dropdown-menu.show {
+                position: fixed !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                border-radius: 16px 16px 0 0 !important;
+                padding: 20px !important;
+                box-shadow: 0 -5px 25px rgba(0,0,0,0.3) !important;
+                z-index: 9999999 !important;
+                animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                border: none !important;
+            }
+            
+            .menu-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999998;
+                backdrop-filter: blur(2px);
+            }
+            .menu-backdrop.show { display: block; }
+
+            .dropdown-menu.show button {
+                padding: 15px !important;
+                font-size: 1rem !important;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            .dropdown-menu.show button:last-child { border-bottom: none; }
+            .dropdown-menu.show button i { margin-right: 15px; font-size: 1.1rem; }
         }
+        
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         /* --- COMPONENTES --- */
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; white-space: nowrap; }
         .btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); color: white; } 
         .btn-secondary { background: #94a3b8; color: white; }
@@ -85,8 +212,8 @@
         .stat-val { font-size: 2rem; font-weight: bold; color: var(--dark); line-height: 1.2; }
         .stat-label { color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
         
-        /* Tabelas */
-        .table-container { border-radius: 12px; border: 1px solid #e2e8f0; background: white; overflow: hidden; }
+        /* Tabelas Desktop Base */
+        .table-container { border-radius: 12px; background: white; overflow: hidden; }
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
         .data-table th { text-align: left; padding: 15px; color: #64748b; border-bottom: 2px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; white-space: nowrap; background: #f8fafc; }
         /* Classes para cores no Header */
@@ -112,60 +239,44 @@
         
         #login-screen { position: fixed; inset: 0; background: var(--dark); z-index: 2500; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(3px); padding: 20px; }
-        .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow-y: auto; }
         
-        /* --- ESTILOS DO MENU DROPDOWN (Novo Visual) --- */
+        /* MENU DROPDOWN */
         .dropdown-menu { 
-            position: absolute; /* Vai ser sobrescrito pelo JS para fixed */
+            position: absolute; 
             background: white; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra estilo Card */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
             display: none; 
-            z-index: 99999; 
+            z-index: 999999; 
             border-radius: 8px; 
-            min-width: 180px; 
+            min-width: 170px; 
             overflow: hidden;
             flex-direction: column;
-            padding: 8px 0; /* Espaçamento vertical interno */
+            padding: 8px 0; 
             animation: fadeIn 0.2s;
         }
-        
         .dropdown-menu.show { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Estilo dos itens dentro do menu para parecer uma lista vertical */
         .dropdown-menu button {
             background: transparent;
             border: none;
             width: 100%;
             text-align: left;
-            padding: 10px 20px; /* Mais espaçamento */
+            padding: 10px 20px; 
             font-size: 0.9rem;
             color: #334155;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px; /* Espaço entre ícone e texto */
+            gap: 12px; 
             transition: background 0.1s;
-            border-radius: 0; /* Remove bordas arredondadas dos botões internos */
+            border-radius: 0;
         }
-        
-        .dropdown-menu button:hover {
-            background-color: #f1f5f9; /* Cinza claro ao passar o mouse */
-        }
-        
-        .dropdown-menu button i {
-            width: 20px; /* Largura fixa pro ícone alinhar o texto */
-            text-align: center;
-            color: #64748b;
-        }
-
-        /* Ajuste específico para o botão de excluir manter a cor vermelha no texto */
-        .dropdown-menu button[style*="color:var(--danger)"] {
-            color: var(--danger) !important;
-        }
-        .dropdown-menu button[style*="color:var(--danger)"] i {
-            color: var(--danger) !important;
-        }
+        .dropdown-menu button:hover { background-color: #f1f5f9; }
+        .dropdown-menu button i { width: 20px; text-align: center; color: #64748b; }
+        .dropdown-menu button[style*="color:var(--danger)"] { color: var(--danger) !important; }
+        .dropdown-menu button[style*="color:var(--danger)"] i { color: var(--danger) !important; }
 
         .search-container { position: relative; width: 300px; }
         .search-container i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
@@ -178,6 +289,8 @@
         <div class="spinner"></div>
         <div style="font-weight: 600; color: var(--primary);">Processando...</div>
     </div>
+    
+    <div id="menu-backdrop" class="menu-backdrop" onclick="closeAllMenus()"></div>
 
     <div id="login-screen">
         <div class="card" style="width: 100%; max-width: 400px; text-align: center; padding: 40px 30px;">
@@ -314,7 +427,7 @@
                         <i class="fas fa-search"></i>
                         <input type="text" id="table-search" placeholder="Buscar..." onkeyup="filterTable()">
                     </div>
-                    <div style="display:flex; gap:5px;">
+                    <div style="display:flex; gap:5px; flex-wrap: wrap; width: 100%; md:width: auto;">
                         <button class="btn btn-secondary hidden" id="btn-back" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
                         <button class="btn btn-primary" id="btn-new" onclick="openForm()"><i class="fas fa-plus"></i> Novo</button>
                     </div>
@@ -380,22 +493,29 @@
 
         <div id="modal-execute" class="modal-overlay hidden">
             <div class="modal-box">
-                <div style="padding: 20px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                <div style="padding: 20px; border-bottom: 1px solid #eee; display:flex; justify-content:space-between; align-items:center; flex-shrink: 0;">
                     <h3 style="margin:0">Executar</h3>
                     <i class="fas fa-times" style="cursor:pointer; padding: 5px;" onclick="closeModal()"></i>
                 </div>
-                <div style="padding: 20px; overflow-y: auto;">
+                <div style="padding: 20px; overflow-y: auto; flex-grow: 1;">
                     <h4 id="exec-name" style="color: var(--primary); margin-top:0; border-bottom: 1px dashed #eee; padding-bottom: 10px;"></h4>
+                    
                     <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px;">
                         <label style="display:block; margin-bottom:5px;">Passos:</label>
                         <span id="exec-steps" style="white-space: pre-wrap;"></span>
                     </div>
+
+                    <div style="background: #fff7ed; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid #ffedd5;">
+                         <label style="display:block; margin-bottom:5px; color: #9a3412;">Resultado Esperado:</label>
+                         <span id="exec-expected" style="white-space: pre-wrap; color: #9a3412;"></span>
+                    </div>
+
                     <div class="form-group"><label>Status</label><select id="exec-status"><option value="Sucesso">✅ Sucesso</option><option value="Bug">❌ Bug / Falha</option></select></div>
                     <div class="form-group"><label>Resultado Obtido (**bold**, - list)</label><textarea id="exec-actual" rows="3"></textarea></div>
                     <div class="form-group"><label>Observações</label><textarea id="exec-obs" rows="2"></textarea></div>
                     <div class="form-group"><label>Evidências (Imagens)</label><input type="file" id="exec-files" multiple accept="image/*"></div>
                 </div>
-                <div style="padding: 20px; border-top: 1px solid #eee; text-align: right; background: #f9fafb;">
+                <div style="padding: 20px; border-top: 1px solid #eee; text-align: right; background: #f9fafb; flex-shrink: 0;">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
                     <button class="btn btn-success" onclick="confirmExecution()">Confirmar</button>
                 </div>
@@ -478,16 +598,13 @@
             if(!background) toggleLoader(false);
             if(res.status === 'sucesso') {
                 const k = res.data.kpis;
-                const totais = res.data.totaisPeriodo; // Novos dados do período
+                const totais = res.data.totaisPeriodo;
                 
-                // KPIs Principais
                 document.getElementById('d-projs').innerText = k.projects; document.getElementById('d-plans').innerText = k.plans;
                 document.getElementById('d-scenarios').innerText = k.scenarios; document.getElementById('d-users').innerText = k.users;
                 
-                // KPIs de Cobertura
                 document.getElementById('d-auto').innerText = k.percAuto; document.getElementById('d-manual').innerText = k.percManual;
                 
-                // KPIs do Período (NOVO)
                 if(totais) {
                     document.getElementById('p-total').innerText = totais.total;
                     document.getElementById('p-sucesso').innerText = totais.sucesso;
@@ -495,12 +612,12 @@
                 }
 
                 const tbProj = document.getElementById('dash-projects-body'); tbProj.innerHTML = '';
-                res.data.projetos.forEach(p => { tbProj.innerHTML += `<tr><td><b>${p.nome}</b></td><td style="text-align:center">${p.total}</td><td style="text-align:center; color: var(--success)">${p.sucesso}</td><td style="text-align:center; color: var(--danger); font-weight:bold">${p.falha}</td></tr>`; });
+                res.data.projetos.forEach(p => { tbProj.innerHTML += `<tr><td data-label="Projeto"><b>${p.nome}</b></td><td data-label="Total" style="text-align:center">${p.total}</td><td data-label="Sucesso" style="text-align:center; color: var(--success)">${p.sucesso}</td><td data-label="Bugs" style="text-align:center; color: var(--danger); font-weight:bold">${p.falha}</td></tr>`; });
                 
                 const tbUser = document.getElementById('dash-users-body'); tbUser.innerHTML = '';
                 res.data.usuarios.forEach(u => {
                     let avatar = u.foto || `https://ui-avatars.com/api/?name=${u.nome}&background=ddd&color=333`;
-                    tbUser.innerHTML += `<tr class="clickable" onclick="openUserHistory('${u.email}', '${u.nome}')"><td style="display:flex; align-items:center; gap:10px;"><img src="${avatar}" style="width:30px; height:30px; border-radius:50%"><b>${u.nome}</b></td><td style="text-align:center; font-weight:bold">${u.total}</td><td style="text-align:center;"><span class="badge badge-green">${u.sucesso}</span></td><td style="text-align:center;"><span class="badge badge-red">${u.bugs}</span></td></tr>`;
+                    tbUser.innerHTML += `<tr class="clickable" onclick="openUserHistory('${u.email}', '${u.nome}')"><td data-label="Analista" style="display:flex; align-items:center; gap:10px;"><img src="${avatar}" style="width:30px; height:30px; border-radius:50%"><b>${u.nome}</b></td><td data-label="Total" style="text-align:center; font-weight:bold">${u.total}</td><td data-label="Sucesso" style="text-align:center;"><span class="badge badge-green">${u.sucesso}</span></td><td data-label="Bugs" style="text-align:center;"><span class="badge badge-red">${u.bugs}</span></td></tr>`;
                 });
                 renderEvolutionChart(res.data.timeline);
             }
@@ -536,14 +653,14 @@
             if(items.length === 0) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum registro.</td></tr>'; return; }
             items.forEach(i => {
                 let badge = i.status === 'Sucesso' ? '<span class="badge badge-green">Sucesso</span>' : '<span class="badge badge-red">Bug</span>';
-                tb.innerHTML += `<tr><td>${i.data}</td><td><div style="font-weight:bold">${i.projeto}</div><div style="font-size:0.8rem; color:#64748b">${i.plano}</div></td><td>${i.cenario}</td><td>${badge}</td></tr>`;
+                tb.innerHTML += `<tr><td data-label="Data">${i.data}</td><td data-label="Projeto/Plano"><div style="font-weight:bold">${i.projeto}</div><div style="font-size:0.8rem; color:#64748b">${i.plano}</div></td><td data-label="Cenário"><div>${i.cenario}</div></td><td data-label="Status">${badge}</td></tr>`;
             });
         }
         function changeHistoryPage(delta) { state.historyPage += delta; renderHistoryTable(); }
 
         function updateBreadcrumb() { const bc = document.getElementById('breadcrumb'); if(state.level === 'projects') bc.innerHTML = `<span class="breadcrumb-active">Projetos</span>`; else if(state.level === 'plans') bc.innerHTML = `<span class="breadcrumb-link" onclick="state.level='projects'; loadList()">Projetos</span> > <span class="breadcrumb-active">Planos</span>`; else if(state.level === 'scenarios') bc.innerHTML = `<span class="breadcrumb-link" onclick="state.level='projects'; loadList()">Projetos</span> > <span class="breadcrumb-link" onclick="state.level='plans'; state.parentId=state.grandParentId; state.parentName=state.grandParentName; loadList()">Planos</span> > <span class="breadcrumb-active">Cenários</span>`; }
         function goBack() { if(state.level === 'scenarios') { state.level = 'plans'; state.parentId = state.grandParentId; state.parentName = state.grandParentName; } else if(state.level === 'plans') { state.level = 'projects'; } state.currentPage = 1; loadList(); }
-        async function loadList() { let payload = {}; let title = '', btnText = ''; if(state.level === 'projects') { payload = { acao: 'listarProjetos' }; title = 'Projetos'; btnText = 'Novo Projeto'; document.getElementById('btn-back').classList.add('hidden'); } else if(state.level === 'plans') { payload = { acao: 'listarPlanos', projetoId: state.parentId }; title = 'Planos de: ' + state.parentName; btnText = 'Novo Plano'; document.getElementById('btn-back').classList.remove('hidden'); } else { payload = { acao: 'listarCenarios', planoId: state.parentId }; title = state.parentName + ' / Cenários'; btnText = 'Novo Cenário'; document.getElementById('btn-back').classList.remove('hidden'); } document.getElementById('list-title').innerText = title; updateBreadcrumb(); document.getElementById('btn-new').innerHTML = `<i class="fas fa-plus"></i> ${btnText}`; document.getElementById('table-search').value = ''; toggleLoader(true); const res = await api(payload); toggleLoader(false); state.data = res.data || []; state.currentPage = 1; renderTable(); }
+        async function loadList() { let payload = {}; let title = '', btnText = ''; if(state.level === 'projects') { payload = { acao: 'listarProjetos' }; title = 'Projetos'; btnText = 'Novo Projeto'; document.getElementById('btn-back').classList.add('hidden'); } else if(state.level === 'plans') { payload = { acao: 'listarPlanos', projetoId: state.parentId }; title = state.parentName; btnText = 'Novo Plano'; document.getElementById('btn-back').classList.remove('hidden'); } else { payload = { acao: 'listarCenarios', planoId: state.parentId }; title = state.parentName + ' / Cenários'; btnText = 'Novo Cenário'; document.getElementById('btn-back').classList.remove('hidden'); } document.getElementById('list-title').innerText = title; updateBreadcrumb(); document.getElementById('btn-new').innerHTML = `<i class="fas fa-plus"></i> ${btnText}`; document.getElementById('table-search').value = ''; toggleLoader(true); const res = await api(payload); toggleLoader(false); state.data = res.data || []; state.currentPage = 1; renderTable(); }
         
         function renderTable(filteredData = null) { 
             const dataToRender = filteredData || state.data; const tb = document.getElementById('table-body'); tb.innerHTML = ''; const th = document.getElementById('table-head'); th.innerHTML = ''; const pagDiv = document.getElementById('pagination'); 
@@ -557,12 +674,13 @@
                 let tr = document.createElement('tr'); tr.classList.add('clickable'); 
                 tr.onclick = (e) => { if(e.target.closest('.dropdown-menu') || e.target.closest('.fa-ellipsis-v')) return; if(state.level === 'projects') drillDown(item.id, item.nome); else if(state.level === 'plans') drillDown(item.id, item.nome); else if(state.level === 'scenarios') openExec(item.id); }; 
                 let html = ''; 
-                if(state.level === 'projects') html = `<td><b>${item.nome}</b></td><td><span class="badge badge-info">${item.qtd_planos}</span></td><td><span class="badge badge-green">${item.qtd_cenarios}</span></td><td><span class="badge badge-purple">${item.perc_auto}%</span></td><td><span class="badge badge-gray">${item.perc_manual}%</span></td>`; 
-                else if(state.level === 'plans') html = `<td><b>${item.nome}</b></td><td>${item.descricao||''}</td><td><span class="badge badge-info">${item.qtd_cenarios}</span></td>`; 
-                else { let st = item.stats; let tipoBadge = `<span class="badge" style="background:#f1f5f9; color:#64748b">${item.tipo_execucao || 'N/A'}</span>`; html = `<td><b>${item.nome}</b></td><td>${tipoBadge}</td><td>${st.total}</td><td><span class="badge badge-red">${st.falha}</span></td><td><span class="badge badge-green">${st.sucesso}</span></td>`; } 
+                if(state.level === 'projects') html = `<td data-label="Nome"><b>${item.nome}</b></td><td data-label="Planos"><span class="badge badge-info">${item.qtd_planos}</span></td><td data-label="Cenários"><span class="badge badge-green">${item.qtd_cenarios}</span></td><td data-label="% Auto"><span class="badge badge-purple">${item.perc_auto}%</span></td><td data-label="% Manual"><span class="badge badge-gray">${item.perc_manual}%</span></td>`; 
+                else if(state.level === 'plans') html = `<td data-label="Nome"><b>${item.nome}</b></td><td data-label="Descrição">${item.descricao||''}</td><td data-label="Cenários"><span class="badge badge-info">${item.qtd_cenarios}</span></td>`; 
+                else { let st = item.stats; let tipoBadge = `<span class="badge" style="background:#f1f5f9; color:#64748b">${item.tipo_execucao || 'N/A'}</span>`; html = `<td data-label="Cenário"><b>${item.nome}</b></td><td data-label="Tipo">${tipoBadge}</td><td data-label="Execuções">${st.total}</td><td data-label="Bugs"><span class="badge badge-red">${st.falha}</span></td><td data-label="Sucesso"><span class="badge badge-green">${st.sucesso}</span></td>`; } 
                 let btnMain = state.level === 'scenarios' ? `<button onclick="openExec('${item.id}')" style="color:var(--success)"><i class="fas fa-play"></i> Executar</button>` : `<button onclick="drillDown('${item.id}', '${item.nome}')"><i class="fas fa-folder-open"></i> Abrir</button>`; 
                 let btnMove = state.level === 'scenarios' ? `<button onclick="openMove('${item.id}')"><i class="fas fa-exchange-alt"></i> Mover</button>` : ''; 
-                html += `<td style="text-align:right;position:relative;width:50px;"><i class="fas fa-ellipsis-v" style="cursor:pointer;padding:10px;color:#94a3b8" onclick="toggleMenu(event,'${item.id}')"></i><div id="menu-${item.id}" class="dropdown-menu">${btnMain}${btnMove}<button onclick="editItem('${item.id}')"><i class="fas fa-edit"></i> Editar</button><button onclick="deleteItem('${item.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i> Excluir</button></div></td>`; tr.innerHTML = html; tb.appendChild(tr); 
+                // BUG FIX: Removed inline style "position:relative;width:50px" to allow CSS absolute positioning on mobile
+                html += `<td class="action-cell" style="text-align:right;"><i class="fas fa-ellipsis-v" style="cursor:pointer;padding:10px;color:#94a3b8" onclick="toggleMenu(event,'${item.id}')"></i><div id="menu-${item.id}" class="dropdown-menu">${btnMain}${btnMove}<button onclick="editItem('${item.id}')"><i class="fas fa-edit"></i> Editar</button><button onclick="deleteItem('${item.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i> Excluir</button></div></td>`; tr.innerHTML = html; tb.appendChild(tr); 
             }); 
         }
         
@@ -570,39 +688,58 @@
         function drillDown(id, name) { if(state.level === 'projects') { state.level = 'plans'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = name; } else if(state.level === 'plans') { state.level = 'scenarios'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = state.parentName + " / " + name; } state.currentPage = 1; loadList(); }
         function filterTable() { const term = document.getElementById('table-search').value.toLowerCase(); renderTable(state.data.filter(i => i.nome.toLowerCase().includes(term))); }
         
-        // --- FUNÇÃO CORRIGIDA E AJUSTADA ---
+        // --- FUNÇÃO MENU ROBUSTA ---
         function toggleMenu(e, id) {
             e.stopPropagation();
             const menu = document.getElementById('menu-' + id);
-            const isVisible = menu && menu.classList.contains('show');
+            
+            // Fecha todos os outros
+            closeAllMenus();
 
-            document.querySelectorAll('.dropdown-menu').forEach(d => {
-                d.classList.remove('show');
-                d.style.cssText = ''; 
-            });
-
-            if (!isVisible && menu) {
-                const rect = e.target.getBoundingClientRect();
-                
-                menu.style.position = 'fixed';
-                menu.style.top = (rect.bottom + 5) + 'px';
-                
-                // Ajuste para alinhar a direita do menu com o ícone, evitando que vaze da tela
-                // Largura min-width é 180px, então jogamos 160px para a esquerda
-                menu.style.left = (rect.left - 160) + 'px';
-                
-                menu.style.right = 'auto'; 
-                menu.style.zIndex = '99999';
-
+            if (menu && !menu.classList.contains('show')) {
+                // Abre o menu
                 menu.classList.add('show');
+                
+                // BUG FIX: Elevate Z-Index of parent cell to ensure it stays above the backdrop on mobile
+                const parentCell = menu.closest('.action-cell');
+                if(parentCell) parentCell.style.zIndex = '10000001';
+
+                // Se for mobile (largura < 768px), o CSS lida com a posição fixa bottom
+                // Se for desktop, precisamos calcular a posição
+                if (window.innerWidth > 768) {
+                    const rect = e.target.getBoundingClientRect();
+                    menu.style.position = 'fixed';
+                    menu.style.top = (rect.bottom + 5) + 'px';
+                    menu.style.left = (rect.right - 170) + 'px';
+                    menu.style.right = 'auto'; 
+                    menu.style.zIndex = '999999';
+                } else {
+                    // Mobile: Mostra o backdrop
+                    document.getElementById('menu-backdrop').classList.add('show');
+                    // Limpa estilos inline que possam ter ficado de um redimensionamento
+                    menu.style.top = '';
+                    menu.style.left = '';
+                    menu.style.position = '';
+                }
             }
         }
-        window.addEventListener('scroll', () => {
-            document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
-        }, true);
-        // ------------------------
 
-        window.onclick = function(e) { if(!e.target.matches('.fa-ellipsis-v')) document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); }
+        function closeAllMenus() {
+            document.querySelectorAll('.dropdown-menu').forEach(d => {
+                d.classList.remove('show');
+            });
+            document.getElementById('menu-backdrop').classList.remove('show');
+            // BUG FIX: Reset Z-Index of all action cells
+            document.querySelectorAll('.action-cell').forEach(el => el.style.zIndex = '');
+        }
+
+        window.addEventListener('scroll', () => {
+            if(window.innerWidth > 768) closeAllMenus(); // Fecha ao rolar no desktop
+        }, true);
+
+        window.onclick = function(e) { 
+            if(!e.target.matches('.fa-ellipsis-v')) closeAllMenus(); 
+        }
         
         async function openMove(id) { state.movingId = id; document.getElementById('modal-move').classList.remove('hidden'); const res = await api({ acao: 'listarProjetos' }); const sel = document.getElementById('move-project'); sel.innerHTML = '<option value="">Selecione o Projeto</option>'; res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`); }
         async function loadMovePlans() { const pId = document.getElementById('move-project').value; const sel = document.getElementById('move-plan'); sel.innerHTML = '<option value="">Carregando...</option>'; if(!pId) return; const res = await api({ acao: 'listarPlanos', projetoId: pId }); sel.innerHTML = '<option value="">Selecione o Plano</option>'; res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`); }
@@ -613,7 +750,18 @@
         async function saveItem() { let item = { nome: document.getElementById('f-nome').value }; let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; if(state.level === 'plans') { item.descricao = document.getElementById('f-desc').value; if(!state.currentItem) item.projeto_id = state.parentId; } if(state.level === 'projects') item.descricao = document.getElementById('f-desc').value; if(state.level === 'scenarios') { item.tipo_execucao = document.getElementById('f-tipo').value; item.passo_a_passo = document.getElementById('f-passos').value; item.resultado_esperado = document.getElementById('f-res').value; if(!state.currentItem) item.plano_id = state.parentId; } toggleLoader(true); const res = await api({ acao: state.currentItem ? 'editar' : 'criar', aba, item, id: state.currentItem?.id }); toggleLoader(false); if(res.status === 'sucesso') { closeForm(); loadList(); loadDashboard(true); } }
         function editItem(id) { state.currentItem = state.data.find(i => i.id == id); openForm(); }
         async function deleteItem(id) { if(confirm("Excluir item?")) { let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; toggleLoader(true); await api({ acao: 'excluir', aba, id }); toggleLoader(false); loadList(); loadDashboard(true); } }
-        function openExec(id) { state.executingItem = state.data.find(i => i.id == id); document.getElementById('exec-name').innerText = state.executingItem.nome; document.getElementById('exec-steps').innerText = state.executingItem.passo_a_passo || 'Sem passos'; document.getElementById('exec-actual').value = ''; document.getElementById('exec-obs').value = ''; document.getElementById('exec-files').value = ''; document.getElementById('modal-execute').classList.remove('hidden'); }
+        
+        function openExec(id) { 
+            state.executingItem = state.data.find(i => i.id == id); 
+            document.getElementById('exec-name').innerText = state.executingItem.nome; 
+            document.getElementById('exec-steps').innerText = state.executingItem.passo_a_passo || 'Sem passos'; 
+            document.getElementById('exec-expected').innerText = state.executingItem.resultado_esperado || 'Não especificado'; 
+            document.getElementById('exec-actual').value = ''; 
+            document.getElementById('exec-obs').value = ''; 
+            document.getElementById('exec-files').value = ''; 
+            document.getElementById('modal-execute').classList.remove('hidden'); 
+        }
+        
         function closeModal() { document.getElementById('modal-execute').classList.add('hidden'); }
         async function confirmExecution() { const status = document.getElementById('exec-status').value; const actual = document.getElementById('exec-actual').value; const obs = document.getElementById('exec-obs').value; const files = document.getElementById('exec-files').files; toggleLoader(true); let fileData = []; if(files.length > 0) { fileData = await Promise.all(Array.from(files).map(f => new Promise(r => { const reader = new FileReader(); reader.onload = () => r({name: f.name, data: reader.result}); reader.readAsDataURL(f); }))); } let urls = []; if (fileData.length > 0) { const upRes = await api({ acao: 'uploadMultiplo', arquivos: fileData }); if(upRes.status === 'sucesso') urls = upRes.data.urls; } const res = await api({ acao: 'registrarExecucao', cenarioId: state.executingItem.id, projetoId: state.grandParentId, planoId: state.parentId, status: status, resultadoObtido: actual, obs: obs, evidencias: urls.join(', '), usuario: state.user.email }); toggleLoader(false); if(res.status === 'sucesso') { closeModal(); generatePDF({ cenario: state.executingItem.nome, passos: state.executingItem.passo_a_passo, esperado: state.executingItem.resultado_esperado, status: status, obtido: actual, obs: obs, evidenciasUrls: urls, evidenciasData: fileData, usuario: state.user.nome }); loadList(); loadDashboard(true); } }
         function generatePDF(data) { const { jsPDF } = window.jspdf; const doc = new jsPDF(); const color = data.status === 'Sucesso' ? '#059669' : '#ef4444'; doc.setFillColor(color); doc.rect(0, 0, 210, 20, 'F'); doc.setTextColor('#ffffff'); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text("Relatório de Execução - QA Agrotis", 105, 13, { align: "center" }); doc.setTextColor('#333333'); doc.setFontSize(10); let y = 35; const lineH = 6; const renderMarkdown = (label, text) => { doc.setFont('helvetica', 'bold'); doc.text(label, 15, y); y += lineH; doc.setFont('helvetica', 'normal'); if(!text) { y += lineH; return; } const lines = text.split('\n'); lines.forEach(line => { let prefix = ""; let cleanLine = line; if(line.trim().startsWith('-')) { prefix = "• "; cleanLine = line.trim().substring(1).trim(); } if(cleanLine.includes('**')) { doc.setFont('helvetica', 'bold'); cleanLine = cleanLine.replace(/\*\*/g, ''); } else { doc.setFont('helvetica', 'normal'); } const splitText = doc.splitTextToSize(prefix + cleanLine, 180); doc.text(splitText, 15, y); y += (splitText.length * lineH); }); y += 5; }; doc.setFont('helvetica', 'bold'); doc.text("Cenário:", 15, y); doc.setFont('helvetica', 'normal'); doc.text(data.cenario, 35, y); y+=10; doc.setFont('helvetica', 'bold'); doc.text("Executado por:", 15, y); doc.setFont('helvetica', 'normal'); doc.text(data.usuario + " em " + new Date().toLocaleString(), 45, y); y+=10; doc.setDrawColor(200); doc.line(15, y, 195, y); y += 10; renderMarkdown("Passo a Passo:", data.passos); renderMarkdown("Resultado Esperado:", data.esperado); doc.setFillColor(data.status === 'Sucesso' ? '#d1fae5' : '#fee2e2'); doc.rect(15, y-5, 180, 15, 'F'); doc.setFont('helvetica', 'bold'); doc.setTextColor(data.status === 'Sucesso' ? '#065f46' : '#991b1b'); doc.text("STATUS FINAL: " + data.status.toUpperCase(), 105, y+2, {align: 'center'}); doc.setTextColor('#333333'); y += 20; renderMarkdown("Resultado Obtido:", data.obtido); renderMarkdown("Observações:", data.obs); if(data.evidenciasData && data.evidenciasData.length > 0) { if(y > 200) { doc.addPage(); y = 20; } doc.setFont('helvetica', 'bold'); doc.text("Evidências Visuais:", 15, y); y+=10; data.evidenciasData.forEach(file => { if(y > 220) { doc.addPage(); y = 20; } try { doc.addImage(file.data, 'JPEG', 15, y, 80, 60); doc.setFontSize(8); doc.text(file.name, 15, y+65); doc.setFontSize(10); y += 75; } catch(e) { doc.text("[Erro img]", 15, y); y += 10; } }); } if(data.evidenciasUrls && data.evidenciasUrls.length > 0) { if(y > 260) { doc.addPage(); y = 20; } doc.setFont('helvetica', 'bold'); doc.text("Links no Drive:", 15, y); y+=7; doc.setFont('helvetica', 'normal'); doc.setTextColor('#0000FF'); data.evidenciasUrls.forEach(link => { doc.textWithLink("Abrir Arquivo", 15, y, { url: link }); y+=7; }); } doc.save(`Execucao_${data.cenario.substring(0,10)}.pdf`); }
