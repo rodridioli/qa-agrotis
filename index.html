@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* [Seção CSS: Mantida inalterada para garantir a interface web] */
         /* --- CSS RESET & BASE --- */
         :root { 
             --primary: #059669; --primary-dark: #047857; --primary-light: #d1fae5;
@@ -274,13 +275,34 @@
             border-radius: 0;
         }
         .dropdown-menu button:hover { background-color: #f1f5f9; }
-        .dropdown-menu button i { width: 20px; text-align: center; color: #64748b; }
         .dropdown-menu button[style*="color:var(--danger)"] { color: var(--danger) !important; }
         .dropdown-menu button[style*="color:var(--danger)"] i { color: var(--danger) !important; }
 
         .search-container { position: relative; width: 300px; }
         .search-container i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .search-container input { padding-left: 40px; margin: 0; }
+
+        /* Blocos de informação na modal */
+        .info-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #64748b;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .info-value {
+            font-size: 0.95rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -498,7 +520,23 @@
                     <i class="fas fa-times" style="cursor:pointer; padding: 5px;" onclick="closeModal()"></i>
                 </div>
                 <div style="padding: 20px; overflow-y: auto; flex-grow: 1;">
-                    <h4 id="exec-name" style="color: var(--primary); margin-top:0; border-bottom: 1px dashed #eee; padding-bottom: 10px;"></h4>
+                    <div class="info-block">
+                        <span class="info-label">Projeto</span>
+                        <div class="info-value" id="exec-proj"></div>
+                    </div>
+                    <div class="info-block">
+                        <span class="info-label">Plano de Teste</span>
+                        <div class="info-value" id="exec-plan"></div>
+                    </div>
+                    <div class="info-block">
+                        <span class="info-label">Cenário</span>
+                        <div class="info-value" id="exec-name"></div>
+                    </div>
+
+                    <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid #bae6fd;">
+                        <label style="display:block; margin-bottom:5px; color: #0284c7;">Requisitos:</label>
+                        <span id="exec-reqs" style="white-space: pre-wrap; color: #0369a1;"></span>
+                    </div>
                     
                     <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px;">
                         <label style="display:block; margin-bottom:5px;">Passos:</label>
@@ -512,6 +550,9 @@
 
                     <div class="form-group"><label>Status</label><select id="exec-status"><option value="Sucesso">✅ Sucesso</option><option value="Bug">❌ Bug / Falha</option></select></div>
                     <div class="form-group"><label>Resultado Obtido (**bold**, - list)</label><textarea id="exec-actual" rows="3"></textarea></div>
+                    
+                    <div class="form-group"><label>Jira (Link)</label><input type="url" id="exec-jira" placeholder="https://jira.exemplo.com/browse/QA-123"></div>
+                    
                     <div class="form-group"><label>Observações</label><textarea id="exec-obs" rows="2"></textarea></div>
                     <div class="form-group"><label>Evidências (Imagens)</label><input type="file" id="exec-files" multiple accept="image/*"></div>
                 </div>
@@ -545,9 +586,10 @@
     </main>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyhMOLgJ_5XmrK1aAFvKx2h5GOI90BlWq8gw6wHchMtiMSXb4QNsHkaWYvT9O79hQpmmQ/exec"; 
+        // Use o seu URL de API aqui
+        const API_URL = "https://script.google.com/macros/s/AKfycbzylXoPy_nAPCMG0nbUP7dnTv0cRNIjrPKw4QEzfqAa7ABvWZZm_NsEAWKmgG2FzqcUcg/exec"; 
 
-        let state = { user: null, view: 'dashboard', level: 'projects', parentId: null, grandParentId: null, data: [], currentItem: null, currentPage: 1, itemsPerPage: 30, movingId: null, historyData: [], historyPage: 1 };
+        let state = { user: null, view: 'dashboard', level: 'projects', parentId: null, grandParentId: null, parentName: null, grandParentName: null, data: [], currentItem: null, currentPage: 1, itemsPerPage: 30, movingId: null, historyData: [], historyPage: 1 };
 
         window.onload = () => {
             const now = new Date();
@@ -679,33 +721,38 @@
                 else { let st = item.stats; let tipoBadge = `<span class="badge" style="background:#f1f5f9; color:#64748b">${item.tipo_execucao || 'N/A'}</span>`; html = `<td data-label="Cenário"><b>${item.nome}</b></td><td data-label="Tipo">${tipoBadge}</td><td data-label="Execuções">${st.total}</td><td data-label="Bugs"><span class="badge badge-red">${st.falha}</span></td><td data-label="Sucesso"><span class="badge badge-green">${st.sucesso}</span></td>`; } 
                 let btnMain = state.level === 'scenarios' ? `<button onclick="openExec('${item.id}')" style="color:var(--success)"><i class="fas fa-play"></i> Executar</button>` : `<button onclick="drillDown('${item.id}', '${item.nome}')"><i class="fas fa-folder-open"></i> Abrir</button>`; 
                 let btnMove = state.level === 'scenarios' ? `<button onclick="openMove('${item.id}')"><i class="fas fa-exchange-alt"></i> Mover</button>` : ''; 
-                // BUG FIX: Removed inline style "position:relative;width:50px" to allow CSS absolute positioning on mobile
-                html += `<td class="action-cell" style="text-align:right;"><i class="fas fa-ellipsis-v" style="cursor:pointer;padding:10px;color:#94a3b8" onclick="toggleMenu(event,'${item.id}')"></i><div id="menu-${item.id}" class="dropdown-menu">${btnMain}${btnMove}<button onclick="editItem('${item.id}')"><i class="fas fa-edit"></i> Editar</button><button onclick="deleteItem('${item.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i> Excluir</button></div></td>`; tr.innerHTML = html; tb.appendChild(tr); 
+                html += `<td class="action-cell" style="text-align:right;"><i class="fas fa-ellipsis-v" style="cursor:pointer;padding:10px 20px;color:#94a3b8" onclick="toggleMenu(event,'${item.id}')"></i><div id="menu-${item.id}" class="dropdown-menu">${btnMain}${btnMove}<button onclick="editItem('${item.id}')"><i class="fas fa-edit"></i> Editar</button><button onclick="deleteItem('${item.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i> Excluir</button></div></td>`; tr.innerHTML = html; tb.appendChild(tr); 
             }); 
         }
         
         function changePage(delta) { state.currentPage += delta; filterTable(); }
-        function drillDown(id, name) { if(state.level === 'projects') { state.level = 'plans'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = name; } else if(state.level === 'plans') { state.level = 'scenarios'; state.grandParentId = state.parentId; state.grandParentName = state.parentName; state.parentId = id; state.parentName = state.parentName + " / " + name; } state.currentPage = 1; loadList(); }
+        function drillDown(id, name) { 
+            if(state.level === 'projects') { 
+                state.level = 'plans'; 
+                state.grandParentId = state.parentId; 
+                state.grandParentName = state.parentName; // Undefined no nível 1, mas ok
+                state.parentId = id; 
+                state.parentName = name; 
+            } else if(state.level === 'plans') { 
+                state.level = 'scenarios'; 
+                state.grandParentId = state.parentId; 
+                state.grandParentName = state.parentName; // Nome do Projeto
+                state.parentId = id; 
+                state.parentName = state.parentName + " / " + name; // Projeto / Plano
+            } 
+            state.currentPage = 1; 
+            loadList(); 
+        }
         function filterTable() { const term = document.getElementById('table-search').value.toLowerCase(); renderTable(state.data.filter(i => i.nome.toLowerCase().includes(term))); }
         
-        // --- FUNÇÃO MENU ROBUSTA ---
         function toggleMenu(e, id) {
             e.stopPropagation();
             const menu = document.getElementById('menu-' + id);
-            
-            // Fecha todos os outros
             closeAllMenus();
-
             if (menu && !menu.classList.contains('show')) {
-                // Abre o menu
                 menu.classList.add('show');
-                
-                // BUG FIX: Elevate Z-Index of parent cell to ensure it stays above the backdrop on mobile
                 const parentCell = menu.closest('.action-cell');
                 if(parentCell) parentCell.style.zIndex = '10000001';
-
-                // Se for mobile (largura < 768px), o CSS lida com a posição fixa bottom
-                // Se for desktop, precisamos calcular a posição
                 if (window.innerWidth > 768) {
                     const rect = e.target.getBoundingClientRect();
                     menu.style.position = 'fixed';
@@ -714,57 +761,374 @@
                     menu.style.right = 'auto'; 
                     menu.style.zIndex = '999999';
                 } else {
-                    // Mobile: Mostra o backdrop
                     document.getElementById('menu-backdrop').classList.add('show');
-                    // Limpa estilos inline que possam ter ficado de um redimensionamento
-                    menu.style.top = '';
-                    menu.style.left = '';
-                    menu.style.position = '';
+                    menu.style.top = ''; menu.style.left = ''; menu.style.position = '';
                 }
             }
         }
 
         function closeAllMenus() {
-            document.querySelectorAll('.dropdown-menu').forEach(d => {
-                d.classList.remove('show');
-            });
+            document.querySelectorAll('.dropdown-menu').forEach(d => { d.classList.remove('show'); });
             document.getElementById('menu-backdrop').classList.remove('show');
-            // BUG FIX: Reset Z-Index of all action cells
             document.querySelectorAll('.action-cell').forEach(el => el.style.zIndex = '');
         }
 
-        window.addEventListener('scroll', () => {
-            if(window.innerWidth > 768) closeAllMenus(); // Fecha ao rolar no desktop
-        }, true);
-
-        window.onclick = function(e) { 
-            if(!e.target.matches('.fa-ellipsis-v')) closeAllMenus(); 
-        }
+        window.addEventListener('scroll', () => { if(window.innerWidth > 768) closeAllMenus(); }, true);
+        window.onclick = function(e) { if(!e.target.matches('.fa-ellipsis-v')) closeAllMenus(); }
         
         async function openMove(id) { state.movingId = id; document.getElementById('modal-move').classList.remove('hidden'); const res = await api({ acao: 'listarProjetos' }); const sel = document.getElementById('move-project'); sel.innerHTML = '<option value="">Selecione o Projeto</option>'; res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`); }
         async function loadMovePlans() { const pId = document.getElementById('move-project').value; const sel = document.getElementById('move-plan'); sel.innerHTML = '<option value="">Carregando...</option>'; if(!pId) return; const res = await api({ acao: 'listarPlanos', projetoId: pId }); sel.innerHTML = '<option value="">Selecione o Plano</option>'; res.data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nome}</option>`); }
         async function confirmMove() { const novoPlano = document.getElementById('move-plan').value; if(!novoPlano) return alert("Selecione um plano"); toggleLoader(true); const res = await api({ acao: 'moverCenario', cenarioId: state.movingId, novoPlanoId: novoPlano }); toggleLoader(false); if(res.status === 'sucesso') { alert("Cenário movido com sucesso!"); document.getElementById('modal-move').classList.add('hidden'); loadList(); } else alert("Erro ao mover"); }
 
-        function openForm() { document.getElementById('view-list').classList.add('hidden'); document.getElementById('view-form').classList.remove('hidden'); let context = state.level === 'projects' ? 'Projeto' : state.level === 'plans' ? 'Plano' : 'Cenário'; document.getElementById('form-title').innerText = `${state.currentItem ? 'Editar' : 'Novo'} ${context}`; const c = document.getElementById('form-fields'); c.innerHTML = `<div class="form-group"><label>Nome</label><input id="f-nome"></div>`; if(state.level !== 'scenarios') { c.innerHTML += `<div class="form-group"><label>Descrição</label><textarea id="f-desc"></textarea></div>`; } else { c.innerHTML += `<div class="form-group"><label>Tipo de Execução</label><select id="f-tipo"><option value="Manual">Manual</option><option value="Automatizado">Automatizado</option><option value="Manual e Automatizado">Manual e Automatizado</option></select></div><div class="form-group"><label>Passos</label><textarea id="f-passos" rows="4"></textarea></div><div class="form-group"><label>Resultado Esperado</label><textarea id="f-res" rows="2"></textarea></div>`; } if(state.currentItem) { document.getElementById('f-nome').value = state.currentItem.nome; if(document.getElementById('f-desc')) document.getElementById('f-desc').value = state.currentItem.descricao || ''; if(document.getElementById('f-tipo')) document.getElementById('f-tipo').value = state.currentItem.tipo_execucao || 'Manual'; if(document.getElementById('f-passos')) document.getElementById('f-passos').value = state.currentItem.passo_a_passo || ''; if(document.getElementById('f-res')) document.getElementById('f-res').value = state.currentItem.resultado_esperado || ''; } }
+        function openForm() { 
+            document.getElementById('view-list').classList.add('hidden'); 
+            document.getElementById('view-form').classList.remove('hidden'); 
+            let context = state.level === 'projects' ? 'Projeto' : state.level === 'plans' ? 'Plano' : 'Cenário'; 
+            document.getElementById('form-title').innerText = `${state.currentItem ? 'Editar' : 'Novo'} ${context}`; 
+            const c = document.getElementById('form-fields'); 
+            c.innerHTML = `<div class="form-group"><label>Nome</label><input id="f-nome"></div>`; 
+            
+            if(state.level !== 'scenarios') { 
+                c.innerHTML += `<div class="form-group"><label>Descrição</label><textarea id="f-desc"></textarea></div>`; 
+            } else { 
+                // ADICIONADO: Campo Requisitos
+                c.innerHTML += `<div class="form-group"><label>Requisitos</label><textarea id="f-reqs" rows="3"></textarea></div><div class="form-group"><label>Tipo de Execução</label><select id="f-tipo"><option value="Manual">Manual</option><option value="Automatizado">Automatizado</option><option value="Manual e Automatizado">Manual e Automatizado</option></select></div><div class="form-group"><label>Passos</label><textarea id="f-passos" rows="4"></textarea></div><div class="form-group"><label>Resultado Esperado</label><textarea id="f-res" rows="2"></textarea></div>`; 
+            } 
+            
+            if(state.currentItem) { 
+                document.getElementById('f-nome').value = state.currentItem.nome; 
+                if(document.getElementById('f-desc')) document.getElementById('f-desc').value = state.currentItem.descricao || ''; 
+                if(document.getElementById('f-reqs')) document.getElementById('f-reqs').value = state.currentItem.requisitos || ''; 
+                if(document.getElementById('f-tipo')) document.getElementById('f-tipo').value = state.currentItem.tipo_execucao || 'Manual'; 
+                if(document.getElementById('f-passos')) document.getElementById('f-passos').value = state.currentItem.passo_a_passo || ''; 
+                if(document.getElementById('f-res')) document.getElementById('f-res').value = state.currentItem.resultado_esperado || ''; 
+            } 
+        }
+
         function closeForm() { state.currentItem = null; document.getElementById('view-form').classList.add('hidden'); document.getElementById('view-list').classList.remove('hidden'); }
-        async function saveItem() { let item = { nome: document.getElementById('f-nome').value }; let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; if(state.level === 'plans') { item.descricao = document.getElementById('f-desc').value; if(!state.currentItem) item.projeto_id = state.parentId; } if(state.level === 'projects') item.descricao = document.getElementById('f-desc').value; if(state.level === 'scenarios') { item.tipo_execucao = document.getElementById('f-tipo').value; item.passo_a_passo = document.getElementById('f-passos').value; item.resultado_esperado = document.getElementById('f-res').value; if(!state.currentItem) item.plano_id = state.parentId; } toggleLoader(true); const res = await api({ acao: state.currentItem ? 'editar' : 'criar', aba, item, id: state.currentItem?.id }); toggleLoader(false); if(res.status === 'sucesso') { closeForm(); loadList(); loadDashboard(true); } }
+        async function saveItem() { 
+            let item = { nome: document.getElementById('f-nome').value }; 
+            let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; 
+            if(state.level === 'plans') { item.descricao = document.getElementById('f-desc').value; if(!state.currentItem) item.projeto_id = state.parentId; } 
+            if(state.level === 'projects') item.descricao = document.getElementById('f-desc').value; 
+            if(state.level === 'scenarios') { 
+                item.requisitos = document.getElementById('f-reqs').value;
+                item.tipo_execucao = document.getElementById('f-tipo').value; 
+                item.passo_a_passo = document.getElementById('f-passos').value; 
+                item.resultado_esperado = document.getElementById('f-res').value; 
+                if(!state.currentItem) item.plano_id = state.parentId; 
+            } 
+            toggleLoader(true); 
+            const res = await api({ acao: state.currentItem ? 'editar' : 'criar', aba, item, id: state.currentItem?.id }); 
+            toggleLoader(false); 
+            if(res.status === 'sucesso') { closeForm(); loadList(); loadDashboard(true); } 
+        }
         function editItem(id) { state.currentItem = state.data.find(i => i.id == id); openForm(); }
         async function deleteItem(id) { if(confirm("Excluir item?")) { let aba = state.level === 'projects' ? 'Projetos' : state.level === 'plans' ? 'Planos' : 'Cenarios'; toggleLoader(true); await api({ acao: 'excluir', aba, id }); toggleLoader(false); loadList(); loadDashboard(true); } }
         
         function openExec(id) { 
             state.executingItem = state.data.find(i => i.id == id); 
+            
+            let projName = state.grandParentName || "N/A";
+            let planName = state.parentName ? state.parentName.split(' / ').pop() : "N/A";
+            
+            document.getElementById('exec-proj').innerText = projName;
+            document.getElementById('exec-plan').innerText = planName;
             document.getElementById('exec-name').innerText = state.executingItem.nome; 
+            
+            document.getElementById('exec-reqs').innerText = state.executingItem.requisitos || 'Sem Requisitos';
             document.getElementById('exec-steps').innerText = state.executingItem.passo_a_passo || 'Sem passos'; 
             document.getElementById('exec-expected').innerText = state.executingItem.resultado_esperado || 'Não especificado'; 
+            
             document.getElementById('exec-actual').value = ''; 
             document.getElementById('exec-obs').value = ''; 
+            document.getElementById('exec-jira').value = '';
             document.getElementById('exec-files').value = ''; 
             document.getElementById('modal-execute').classList.remove('hidden'); 
         }
         
         function closeModal() { document.getElementById('modal-execute').classList.add('hidden'); }
-        async function confirmExecution() { const status = document.getElementById('exec-status').value; const actual = document.getElementById('exec-actual').value; const obs = document.getElementById('exec-obs').value; const files = document.getElementById('exec-files').files; toggleLoader(true); let fileData = []; if(files.length > 0) { fileData = await Promise.all(Array.from(files).map(f => new Promise(r => { const reader = new FileReader(); reader.onload = () => r({name: f.name, data: reader.result}); reader.readAsDataURL(f); }))); } let urls = []; if (fileData.length > 0) { const upRes = await api({ acao: 'uploadMultiplo', arquivos: fileData }); if(upRes.status === 'sucesso') urls = upRes.data.urls; } const res = await api({ acao: 'registrarExecucao', cenarioId: state.executingItem.id, projetoId: state.grandParentId, planoId: state.parentId, status: status, resultadoObtido: actual, obs: obs, evidencias: urls.join(', '), usuario: state.user.email }); toggleLoader(false); if(res.status === 'sucesso') { closeModal(); generatePDF({ cenario: state.executingItem.nome, passos: state.executingItem.passo_a_passo, esperado: state.executingItem.resultado_esperado, status: status, obtido: actual, obs: obs, evidenciasUrls: urls, evidenciasData: fileData, usuario: state.user.nome }); loadList(); loadDashboard(true); } }
-        function generatePDF(data) { const { jsPDF } = window.jspdf; const doc = new jsPDF(); const color = data.status === 'Sucesso' ? '#059669' : '#ef4444'; doc.setFillColor(color); doc.rect(0, 0, 210, 20, 'F'); doc.setTextColor('#ffffff'); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text("Relatório de Execução - QA Agrotis", 105, 13, { align: "center" }); doc.setTextColor('#333333'); doc.setFontSize(10); let y = 35; const lineH = 6; const renderMarkdown = (label, text) => { doc.setFont('helvetica', 'bold'); doc.text(label, 15, y); y += lineH; doc.setFont('helvetica', 'normal'); if(!text) { y += lineH; return; } const lines = text.split('\n'); lines.forEach(line => { let prefix = ""; let cleanLine = line; if(line.trim().startsWith('-')) { prefix = "• "; cleanLine = line.trim().substring(1).trim(); } if(cleanLine.includes('**')) { doc.setFont('helvetica', 'bold'); cleanLine = cleanLine.replace(/\*\*/g, ''); } else { doc.setFont('helvetica', 'normal'); } const splitText = doc.splitTextToSize(prefix + cleanLine, 180); doc.text(splitText, 15, y); y += (splitText.length * lineH); }); y += 5; }; doc.setFont('helvetica', 'bold'); doc.text("Cenário:", 15, y); doc.setFont('helvetica', 'normal'); doc.text(data.cenario, 35, y); y+=10; doc.setFont('helvetica', 'bold'); doc.text("Executado por:", 15, y); doc.setFont('helvetica', 'normal'); doc.text(data.usuario + " em " + new Date().toLocaleString(), 45, y); y+=10; doc.setDrawColor(200); doc.line(15, y, 195, y); y += 10; renderMarkdown("Passo a Passo:", data.passos); renderMarkdown("Resultado Esperado:", data.esperado); doc.setFillColor(data.status === 'Sucesso' ? '#d1fae5' : '#fee2e2'); doc.rect(15, y-5, 180, 15, 'F'); doc.setFont('helvetica', 'bold'); doc.setTextColor(data.status === 'Sucesso' ? '#065f46' : '#991b1b'); doc.text("STATUS FINAL: " + data.status.toUpperCase(), 105, y+2, {align: 'center'}); doc.setTextColor('#333333'); y += 20; renderMarkdown("Resultado Obtido:", data.obtido); renderMarkdown("Observações:", data.obs); if(data.evidenciasData && data.evidenciasData.length > 0) { if(y > 200) { doc.addPage(); y = 20; } doc.setFont('helvetica', 'bold'); doc.text("Evidências Visuais:", 15, y); y+=10; data.evidenciasData.forEach(file => { if(y > 220) { doc.addPage(); y = 20; } try { doc.addImage(file.data, 'JPEG', 15, y, 80, 60); doc.setFontSize(8); doc.text(file.name, 15, y+65); doc.setFontSize(10); y += 75; } catch(e) { doc.text("[Erro img]", 15, y); y += 10; } }); } if(data.evidenciasUrls && data.evidenciasUrls.length > 0) { if(y > 260) { doc.addPage(); y = 20; } doc.setFont('helvetica', 'bold'); doc.text("Links no Drive:", 15, y); y+=7; doc.setFont('helvetica', 'normal'); doc.setTextColor('#0000FF'); data.evidenciasUrls.forEach(link => { doc.textWithLink("Abrir Arquivo", 15, y, { url: link }); y+=7; }); } doc.save(`Execucao_${data.cenario.substring(0,10)}.pdf`); }
+        async function confirmExecution() { 
+            const status = document.getElementById('exec-status').value; 
+            const actual = document.getElementById('exec-actual').value; 
+            const obs = document.getElementById('exec-obs').value; 
+            const jira = document.getElementById('exec-jira').value; 
+            const files = document.getElementById('exec-files').files; 
+            toggleLoader(true); 
+            let fileData = []; 
+            if(files.length > 0) { fileData = await Promise.all(Array.from(files).map(f => new Promise(r => { const reader = new FileReader(); reader.onload = () => r({name: f.name, data: reader.result}); reader.readAsDataURL(f); }))); } 
+            let urls = []; 
+            if (fileData.length > 0) { const upRes = await api({ acao: 'uploadMultiplo', arquivos: fileData }); if(upRes.status === 'sucesso') urls = upRes.data.urls; } 
+            
+            const res = await api({ 
+                acao: 'registrarExecucao', 
+                cenarioId: state.executingItem.id, 
+                projetoId: state.grandParentId, 
+                planoId: state.parentId, 
+                status: status, 
+                resultadoObtido: actual, 
+                obs: obs, 
+                jira: jira, 
+                evidencias: urls.join(', '), 
+                usuario: state.user.email 
+            }); 
+            
+            toggleLoader(false); 
+            if(res.status === 'sucesso') { 
+                closeModal(); 
+                
+                let projName = state.grandParentName || "N/A";
+                let planName = state.parentName ? state.parentName.split(' / ').pop() : "N/A";
+
+                generatePDF({ 
+                    cenario: state.executingItem.nome, 
+                    projeto: projName,
+                    plano: planName,
+                    requisitos: state.executingItem.requisitos,
+                    passos: state.executingItem.passo_a_passo, 
+                    esperado: state.executingItem.resultado_esperado, 
+                    status: status, 
+                    obtido: actual, 
+                    obs: obs, 
+                    jira: jira,
+                    evidenciasUrls: urls, 
+                    evidenciasData: fileData, 
+                    usuario: state.user.nome 
+                }); 
+                loadList(); 
+                loadDashboard(true); 
+            } 
+        }
+
+        // --- FUNÇÃO generatePDF CORRIGIDA E ESTILIZADA ---
+        function generatePDF(data) { 
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF(); 
+            const resultColor = data.status === 'Sucesso' ? '#10b981' : '#ef4444'; // Cor para o resultado (verde/vermelho)
+            const now = new Date();
+            
+            // Formatando Data e Hora
+            const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const hour = now.getHours().toString().padStart(2, '0');
+            const minute = now.getMinutes().toString().padStart(2, '0');
+            const timeStr = `${hour}h${minute}min`;
+            
+            // --- Variáveis de Layout PDF ---
+            const FONT_BASE = 'helvetica';
+            const FONT_NORMAL = 'normal';
+            const FONT_BOLD = 'bold';
+            
+            const MARGIN_LEFT = 15;
+            const MARGIN_RIGHT = 15;
+            const WRAP_WIDTH = 210 - MARGIN_LEFT - MARGIN_RIGHT;
+            
+            const FONT_SIZE_TITLE = 16;
+            const FONT_SIZE_CONTENT = 10; // Reduzido um pouco para melhor fluxo
+            const FONT_SIZE_HEADER_LABEL = 10;
+            const FONT_SIZE_HEADER_VALUE = 11;
+            
+            const LINE_HEIGHT_SM = 5.5; // Para detalhes do cabeçalho
+            const LINE_HEIGHT_MD = 6; // Para conteúdo
+            
+            let y = 30; // Posição Y inicial (abaixo do cabeçalho fixo)
+            
+            // --- HEADER FIXO (Topo Colorido) ---
+            doc.setFillColor(resultColor); 
+            doc.rect(0, 0, 210, 15, 'F'); // Retângulo mais fino para o topo
+            doc.setTextColor('#ffffff'); 
+            doc.setFontSize(13); 
+            doc.setFont(FONT_BASE, FONT_BOLD); 
+            doc.text("RELATÓRIO DE EXECUÇÃO - QA AGROTIS", 105, 10, { align: "center" }); 
+            
+            doc.setTextColor('#333333'); 
+            
+            // --- BLOCO DE INFORMAÇÕES (FUNDO CINZA E CANTOS ARREDONDADOS) ---
+            
+            const BLOCK_X = MARGIN_LEFT;
+            const BLOCK_Y = y;
+            const BLOCK_WIDTH = WRAP_WIDTH;
+            const PADDING = 5; // Preenchimento interno do bloco
+            const LABEL_WIDTH = 35; // Largura fixa para os rótulos (Data, Hora, etc)
+            const INITIAL_Y = BLOCK_Y + PADDING + 4; // Começo do texto dentro do bloco
+            let current_y = INITIAL_Y;
+            
+            // Dados para o bloco
+            const headerData = [
+                { label: "Data:", value: dateStr },
+                { label: "Hora:", value: timeStr },
+                { label: "Responsável:", value: data.usuario },
+                { label: "Resultado:", value: data.status.toUpperCase() === 'SUCESSO' ? 'SUCESSO' : 'ERRO', color: data.status === 'Sucesso' ? '#065f46' : '#991b1b', bold: true },
+                { label: "Projeto:", value: data.projeto },
+                { label: "Plano de Teste:", value: data.plano },
+                { label: "Cenário:", value: data.cenario }
+            ];
+
+            // 1. Desenha o Bloco (Fundo cinza claro e cantos arredondados)
+            const blockHeight = (headerData.length * LINE_HEIGHT_SM) + (2 * PADDING) + 5; // Altura calculada
+            doc.setFillColor('#f0f0f0'); 
+            doc.roundedRect(BLOCK_X, BLOCK_Y, BLOCK_WIDTH, blockHeight, 3, 3, 'F');
+            
+            // 2. Adiciona as linhas de informação dentro do bloco
+            headerData.forEach(item => {
+                // Rótulo (Label)
+                doc.setFontSize(FONT_SIZE_HEADER_LABEL);
+                doc.setFont(FONT_BASE, FONT_BOLD); 
+                doc.setTextColor('#555555');
+                doc.text(item.label, BLOCK_X + PADDING, current_y); 
+                
+                // Valor (Value)
+                doc.setFontSize(FONT_SIZE_HEADER_VALUE);
+                doc.setFont(FONT_BASE, item.bold ? FONT_BOLD : FONT_NORMAL); 
+                doc.setTextColor(item.color || '#333333');
+                
+                // Posição do valor (alinhamento forçado após a largura do rótulo)
+                // Usando uma largura fixa para o alinhamento
+                const valueX = BLOCK_X + PADDING + LABEL_WIDTH; 
+                doc.text(item.value, valueX, current_y); 
+                
+                current_y += LINE_HEIGHT_SM;
+            });
+            
+            y = BLOCK_Y + blockHeight + 8; // Atualiza a posição Y para começar o conteúdo após o bloco
+            doc.setTextColor('#333333');
+            
+            // --- Funções Auxiliares (mantidas e ajustadas para novo y) ---
+            
+            // Função Helper para Títulos de Seção e Espaçamento
+            const addSectionTitle = (title) => {
+                y += 6; // Espaço acima
+                if(y > 280) { doc.addPage(); y = 20; }
+                
+                doc.setFontSize(FONT_SIZE_TITLE);
+                doc.setFont(FONT_BASE, FONT_BOLD); 
+                doc.text(title.toUpperCase(), MARGIN_LEFT, y);
+                y += 6; // Espaço após o título
+                doc.setLineWidth(0.5);
+                doc.setDrawColor('#cccccc');
+                doc.line(MARGIN_LEFT, y - 1, MARGIN_LEFT + 60, y - 1); // Linha pequena para estilizar
+                y += 4;
+            }
+
+            // Função Helper para conteúdo formatado (markdown/normal)
+            const renderContent = (text, isLink = false, linkUrl = null) => {
+                if(y > 280) { doc.addPage(); y = 20; }
+
+                if (isLink && linkUrl) {
+                    doc.setFontSize(FONT_SIZE_CONTENT);
+                    doc.setFont(FONT_BASE, FONT_NORMAL); 
+                    doc.setTextColor('#0000FF'); 
+                    doc.textWithLink(text, MARGIN_LEFT, y, { url: linkUrl });
+                    doc.setTextColor('#333333');
+                    y += LINE_HEIGHT_MD;
+                    return;
+                }
+                
+                if (!text || text.trim() === "") { 
+                    doc.setFontSize(FONT_SIZE_CONTENT);
+                    doc.setFont(FONT_BASE, FONT_NORMAL); 
+                    doc.setTextColor('#94a3b8'); // Cor cinza para N/A
+                    doc.text("N/A", MARGIN_LEFT, y);
+                    doc.setTextColor('#333333');
+                    y += LINE_HEIGHT_MD;
+                    return;
+                }
+                
+                doc.setFontSize(FONT_SIZE_CONTENT);
+                const lines = text.split('\n'); 
+                
+                lines.forEach(line => { 
+                    if(y > 280) { doc.addPage(); y = 20; }
+                    let prefix = ""; 
+                    let cleanLine = line; 
+                    let fontStyle = FONT_NORMAL;
+
+                    if(line.trim().startsWith('-')) { prefix = "• "; cleanLine = line.trim().substring(1).trim(); } 
+                    if(cleanLine.includes('**')) { fontStyle = FONT_BOLD; cleanLine = cleanLine.replace(/\*\*/g, ''); } 
+                    
+                    doc.setFont(FONT_BASE, fontStyle); 
+                    const splitText = doc.splitTextToSize(prefix + cleanLine, WRAP_WIDTH); 
+                    doc.text(splitText, MARGIN_LEFT, y); 
+                    y += (splitText.length * LINE_HEIGHT_MD); 
+                }); 
+                y += 2; // Pequeno espaçamento entre blocos de conteúdo
+            }; 
+            
+            // --- SEÇÕES DE CONTEÚDO ---
+
+            // REQUISITOS
+            addSectionTitle("REQUISITOS");
+            renderContent(data.requisitos);
+
+            // PASSO A PASSO
+            addSectionTitle("PASSO A PASSO");
+            renderContent(data.passos);
+
+            // RESULTADO ESPERADO
+            addSectionTitle("RESULTADO ESPERADO");
+            renderContent(data.esperado);
+
+            // RESULTADO OBTIDO
+            addSectionTitle("RESULTADO OBTIDO");
+            renderContent(data.obtido); 
+
+            // JIRA ATENDIDO (Com Link)
+            addSectionTitle("JIRA ATENDIDO");
+            if (data.jira && data.jira.trim() !== "") {
+                renderContent(data.jira, true, data.jira);
+            } else {
+                renderContent("N/A");
+            }
+            
+            // OBSERVAÇÕES
+            addSectionTitle("OBSERVAÇÕES");
+            renderContent(data.obs); 
+            
+            // EVIDÊNCIAS ANEXAS
+            if((data.evidenciasData && data.evidenciasData.length > 0) || (data.evidenciasUrls && data.evidenciasUrls.length > 0)) {
+                
+                addSectionTitle("EVIDÊNCIAS ANEXAS");
+                
+                // Evidências Anexadas (Imagens)
+                data.evidenciasData.forEach(file => { 
+                    if(y > 230) { doc.addPage(); y = 20; } // Adiciona página se a imagem não couber (ajustado para mais espaço)
+                    try { 
+                        const imgWidth = 80;
+                        const imgHeight = 60;
+                        doc.addImage(file.data, 'JPEG', MARGIN_LEFT, y, imgWidth, imgHeight); 
+                        doc.setFontSize(8); 
+                        doc.setFont(FONT_BASE, FONT_NORMAL); 
+                        doc.text(file.name, MARGIN_LEFT, y + imgHeight + 3); 
+                        y += imgHeight + 10; // Espaço após a imagem e o nome
+                    } catch(e) { doc.setFontSize(10); doc.text("[Erro ao carregar imagem]", MARGIN_LEFT, y); y += 10; } 
+                }); 
+                
+                // Links no Drive
+                if(data.evidenciasUrls && data.evidenciasUrls.length > 0) { 
+                    if(y > 270) { doc.addPage(); y = 20; } 
+                    
+                    doc.setFont(FONT_BASE, FONT_BOLD); 
+                    doc.setFontSize(10);
+                    doc.text("Links no Drive:", MARGIN_LEFT, y); 
+                    y += 7; 
+                    
+                    doc.setFont(FONT_BASE, FONT_NORMAL); 
+                    doc.setTextColor('#0000FF'); 
+                    data.evidenciasUrls.forEach(link => { 
+                        if(y > 280) { doc.addPage(); y = 20; }
+                        doc.textWithLink("Abrir Arquivo", MARGIN_LEFT, y, { url: link }); 
+                        y += 7; 
+                    }); 
+                    doc.setTextColor('#333333');
+                } 
+            }
+
+            // --- NOME DO ARQUIVO ---
+            const cleanName = (str) => (str || '').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').substring(0, 30);
+            const fileName = `${cleanName(data.projeto)}_${cleanName(data.plano)}_${cleanName(data.cenario)}_${dateStr.replace(/\//g, '-')}_${cleanName(data.status)}.pdf`;
+
+            doc.save(fileName); 
+        }
+
         async function updateProfile() { const dados = { acao: 'atualizarUsuario', emailOriginal: state.user.email, novoEmail: document.getElementById('p-email').value, novoNome: document.getElementById('p-nome').value, novaSenha: document.getElementById('p-senha').value, novaFoto: document.getElementById('p-foto').value }; if(!dados.novaSenha) return alert("Senha necessária"); toggleLoader(true); await api(dados); toggleLoader(false); alert("Perfil atualizado. Relogue."); location.reload(); }
         function toggleLoader(show) { const l = document.getElementById('loader'); show ? l.classList.remove('hidden') : l.classList.add('hidden'); }
         async function api(data) { try { return await (await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })).json(); } catch(e) { return { status: 'erro', mensagem: e.toString() }; } }
